@@ -13,15 +13,15 @@
 
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
-  <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" /> -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
 
-  <node name="trac_ik_tests" pkg="trac_ik_examples" type="ik_tests" output="screen">
+  <!-- <node name="trac_ik_tests" pkg="trac_ik_examples" type="ik_tests" output="screen">
     <param name="num_samples" value="$(arg num_samples)"/>
     <param name="chain_start" value="$(arg chain_start)"/>
     <param name="chain_end" value="$(arg chain_end)"/>
     <param name="timeout" value="$(arg timeout)"/>
     <param name="urdf_param" value="/robot_description"/>
-  </node>
+  </node> -->
 
 
 </launch>
