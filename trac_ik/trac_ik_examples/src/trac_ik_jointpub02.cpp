@@ -64,18 +64,33 @@ void test(ros::NodeHandle& nh, double num_samples, std::string chain_start, std:
     return;
   }
 
-  valid = tracik_solver.getKDLLimits(ll, ul);
-
+  valid = tracik_solver.getKDLLimits(ll, ul); //calc joint limit from urdf model
   if (!valid)
   {
     ROS_ERROR("There were no valid KDL joint limits found");
     return;
   }
 
+
+  //calc joint limit own setting
+  for (uint j = 0; j < ll.data.size(); j++)
+  {
+    ll(j) = -3.14 / 2.0;
+    ul(j) = 3.14 / 2.0;
+  }
+
   assert(chain.getNrOfJoints() == ll.data.size());
   assert(chain.getNrOfJoints() == ul.data.size());
 
-  ROS_INFO("Using %d joints", chain.getNrOfJoints());
+
+  ROS_INFO("Using %d joints!", chain.getNrOfJoints());
+  for(unsigned int i=0; i<chain.getNrOfJoints(); i++)
+	{
+		ROS_INFO("joint_name[%d]: %s", i, chain.getSegment(i).getJoint().getName().c_str());
+		ROS_INFO_STREAM("lower_joint_limits:"<<ll.data(i,0));//chain_info.joint_names.push_back(chain.getSegment(i).getJoint().getName());
+    ROS_INFO_STREAM("upper_joint_limits:"<<ul.data(i,0));
+  }
+
 
   // Set up KDL IK
   KDL::ChainFkSolverPos_recursive fk_solver(chain); // Forward kin. solver
@@ -92,7 +107,7 @@ void test(ros::NodeHandle& nh, double num_samples, std::string chain_start, std:
     nominal(j) = (ll(j) + ul(j)) / 2.0;
   }
 
-  // Create desired number of valid, random joint configurations
+  // Create inital jointArray
   std::vector<KDL::JntArray> JointList;
   KDL::JntArray q(chain.getNrOfJoints());
 
@@ -163,7 +178,7 @@ ur
   rc=0;
   result(JointList[0].data.size());
   //fk_solver.JntToCart(j1, end_effector_pose);
-  rc = tracik_solver.CartToJnt(nominal, end_effector_pose, result);
+  rc = tracik_solver.CartToJnt(q, end_effector_pose, result);
   ROS_INFO_STREAM("trac ik result="<<rc);
   for (uint i=0;i<result.data.size();i++){
   ROS_INFO_STREAM("IK_result.data("<<i<<",0)="<<result.data(i,0));
