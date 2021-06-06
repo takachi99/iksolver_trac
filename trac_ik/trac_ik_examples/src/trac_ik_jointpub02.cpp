@@ -73,11 +73,11 @@ void test(ros::NodeHandle& nh, double num_samples, std::string chain_start, std:
 
 
   //calc joint limit own setting
-  for (uint j = 0; j < ll.data.size(); j++)
-  {
-    ll(j) = -3.14 / 2.0;
-    ul(j) = 3.14 / 2.0;
-  }
+  // for (uint j = 0; j < ll.data.size(); j++)
+  // {
+  //   ll(j) = -3.14 / 2.0;
+  //   ul(j) = 3.14 / 2.0;
+  // }
 
   assert(chain.getNrOfJoints() == ll.data.size());
   assert(chain.getNrOfJoints() == ul.data.size());
