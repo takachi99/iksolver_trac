@@ -219,8 +219,8 @@ int main(int argc, char** argv)
 
   nh.param("urdf_param", urdf_param, std::string("/robot_description"));
   num_samples =1000;
-  chain_start = "torso_lift_link";
-  chain_end = "r_wrist_roll_link";
+  chain_start = "base_link";
+  chain_end = "wrist_3_link";
   timeout = 0.005;
 
 

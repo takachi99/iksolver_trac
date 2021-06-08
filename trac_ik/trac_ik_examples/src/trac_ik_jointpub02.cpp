@@ -176,8 +176,7 @@ ur
   }
 
   rc=0;
-  result(JointList[0].data.size());
-  //fk_solver.JntToCart(j1, end_effector_pose);
+  fk_solver.JntToCart(j1, end_effector_pose);
   rc = tracik_solver.CartToJnt(q, end_effector_pose, result);
   ROS_INFO_STREAM("trac ik result="<<rc);
   for (uint i=0;i<result.data.size();i++){
