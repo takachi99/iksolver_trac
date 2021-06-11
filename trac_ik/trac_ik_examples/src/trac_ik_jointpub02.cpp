@@ -200,7 +200,7 @@ int main(int argc, char** argv)
   //chain_end = "r_wrist_roll_link";
 
   chain_start = "base_link";
-  chain_end = "wrist_3_link";
+  chain_end = "ee_link";
   timeout = 0.005;
 
 

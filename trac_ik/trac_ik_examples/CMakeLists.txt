@@ -54,6 +54,14 @@ target_link_libraries(trac_ik_jointpub02
   ${orocos_kdl_LIBRARIES}
   ${pkg_nlopt_LIBRARIES}
 )
+
+add_executable(trac_ik_jointpub025 src/trac_ik_jointpub025.cpp)
+target_link_libraries(trac_ik_jointpub025
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+  ${orocos_kdl_LIBRARIES}
+  ${pkg_nlopt_LIBRARIES}
+)
 add_executable(trac_ik_jointpub03 src/trac_ik_jointpub03.cpp)
 target_link_libraries(trac_ik_jointpub03
   ${catkin_LIBRARIES}
@@ -61,6 +69,16 @@ target_link_libraries(trac_ik_jointpub03
   ${orocos_kdl_LIBRARIES}
   ${pkg_nlopt_LIBRARIES}
 )
+
+add_executable(send_frame src/send_frame.cpp)
+target_link_libraries(send_frame
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+  ${orocos_kdl_LIBRARIES}
+  ${pkg_nlopt_LIBRARIES}
+)
+
+
 
 install(TARGETS ik_tests
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
