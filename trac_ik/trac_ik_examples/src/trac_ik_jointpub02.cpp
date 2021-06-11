@@ -46,7 +46,7 @@ double fRand(double min, double max)
 void test(ros::NodeHandle& nh, double num_samples, std::string chain_start, std::string chain_end, double timeout, std::string urdf_param)
 {
 
-  double eps = 1e-5;
+  double eps = 1e-6;
 
   // This constructor parses the URDF loaded in rosparm urdf_param into the
   // needed KDL structures.  We then pull these out to compare against the KDL
@@ -111,11 +111,12 @@ void test(ros::NodeHandle& nh, double num_samples, std::string chain_start, std:
   std::vector<KDL::JntArray> JointList;
   KDL::JntArray q(chain.getNrOfJoints());
 
-
+double joint[]={1.5,0,-1.98,0.0,-1.7,-1.57,1.43};
     for (uint j = 0; j < ll.data.size(); j++)
     {
       //q(j) = fRand(ll(j), ul(j));
-      q(j) = 0.1;
+      //q(j) = joint[j];
+       q(j) = 0.1;
     }
     JointList.push_back(q);
 
@@ -134,14 +135,15 @@ void test(ros::NodeHandle& nh, double num_samples, std::string chain_start, std:
 
 /*
 ur
-- Translation: [0.205, 0.112, 0.596]
-- Rotation: in Quaternion [0.047, -0.062, -0.601, 0.795]
-            in RPY (radian) [0.150, -0.042, -1.298]
-            in RPY (degree) [8.594, -2.428, -74.342]
-
+- Translation: [0.256, 0.109, 0.714]
+- Rotation: in Quaternion [-0.327, 0.327, -0.627, 0.627]
+            in RPY (radian) [-0.962, 0.001, -1.570]
+            in RPY (degree) [-55.093, 0.037, -89.959]
 */
-  KDL::Rotation end_rot=KDL::Rotation::RPY(0.15,-0.042,-1.298); // oroginal quaternion(0.0,0.888,0.0,-0.460),rpy(3.142,-0.956,3.142)
-  KDL::Vector end_pos(0.205,0.112,0.596);// original val (0.635,-0.188,0.291)
+  //KDL::Rotation end_rot=KDL::Rotation::RPY(-0.0001,0.001,-1.570); //
+  KDL::Rotation end_rot=KDL::Rotation::Quaternion(-0.00037397335412140656, 0.0001904047369388022, -0.7071646747715623, 0.7070487583223644); //
+
+  KDL::Vector end_pos(0.063,0.109,0.764);
   KDL::Frame end_effector_pose(end_rot,end_pos);
   // KDL::Vector rot=end_effector_pose.M.GetRot();
   // std::cout << "endeffector.pose.M.GetRot().x="<<rot.x()<<std::endl;
@@ -162,30 +164,19 @@ ur
   // }
 
 
-  KDL::JntArray j1(chain.getNrOfJoints());
-  j1(1)=0.5;
-  j1(2)=0.5;
 
   int rc=0;
-  ROS_INFO_STREAM("*** KDLwith ");
   //fk_solver.JntToCart(j1, end_effector_pose);
-  rc = kdl_solver.CartToJnt(nominal, end_effector_pose, result);
+  rc = tracik_solver.CartToJnt(nominal, end_effector_pose, result);
   ROS_INFO_STREAM("trac ik result="<<rc);
   for (uint i=0;i<result.data.size();i++){
   ROS_INFO_STREAM("IK_result.data("<<i<<",0)="<<result.data(i,0));
   }
 
-  rc=0;
-  result(JointList[0].data.size());
-  //fk_solver.JntToCart(j1, end_effector_pose);
-  rc = tracik_solver.CartToJnt(q, end_effector_pose, result);
-  ROS_INFO_STREAM("trac ik result="<<rc);
-  for (uint i=0;i<result.data.size();i++){
-  ROS_INFO_STREAM("IK_result.data("<<i<<",0)="<<result.data(i,0));
-  }
+
 
 }
-  
+
 
 
 int main(int argc, char** argv)
@@ -209,7 +200,7 @@ int main(int argc, char** argv)
   //chain_end = "r_wrist_roll_link";
 
   chain_start = "base_link";
-  chain_end = "wrist_3_link";
+  chain_end = "ee_link";
   timeout = 0.005;
 
 
