@@ -17,6 +17,7 @@
 
  #include <tf/transform_broadcaster.h>
 
+#include <cmath>
 
 class My_joint_pub{
 
@@ -26,11 +27,14 @@ class My_joint_pub{
     void Publication(const KDL::JntArray &result );
     double eps,timeout;
     std::string chain_start, chain_end, urdf_param;
+    
+    KDL::JntArray pre_result;
   private:
     ros::NodeHandle nh;
     ros::Subscriber sub;
     ros::Publisher pub;
     void find_IK(const KDL::Frame &end_effector_pose);
+    double pre_joyval=0;
 
      };
 
@@ -39,10 +43,11 @@ My_joint_pub::My_joint_pub()
   nh.param("urdf_param", urdf_param, std::string("/robot_description"));
   chain_start = "base_link";
   chain_end = "ee_link";
-  timeout = 0.005;
-  eps = 1e-5;
+  timeout = 0.002;
+  eps = 1e-4;
   pub = nh.advertise<trajectory_msgs::JointTrajectory>("arm_controller/command", 10);
   sub = nh.subscribe("end_effector_pose", 10, &My_joint_pub::callback,this);
+  pre_result.resize(6);
   // ros::Rate loop_rate(500);
 }
 
@@ -96,39 +101,66 @@ void My_joint_pub::find_IK(const KDL::Frame &end_effector_pose)
   }
    KDL::JntArray result(ll.data.size());
   int rc=0;
-  //fk_solver.JntToCart(j1, end_effector_pose);
+  
   rc = tracik_solver.CartToJnt(nominal, end_effector_pose, result);
   ROS_INFO_STREAM("trac ik result="<<rc);
   for (uint i=0;i<result.data.size();i++){
   ROS_INFO_STREAM("IK_result.data("<<i<<",0)="<<result.data(i,0));
     }
+  //   if(rc>0){
+  //   trajectory_msgs::JointTrajectory tr0;
+  //   tr0.header.frame_id ="base_link";
+  //   tr0.joint_names.resize(6);
+  //   tr0.points.resize(1);
+  //   tr0.points[0].positions.resize(6);
+  //   tr0.header.stamp = ros::Time::now();
+  //   tr0.points[0].time_from_start = ros::Duration(0.2);
+  // for(unsigned int i=0; i<chain.getNrOfJoints(); i++)
+	// {
+  //   tr0.joint_names[i] = chain.getSegment(i).getJoint().getName().c_str();
+  //   tr0.points[0].positions[i]=result(i);
+  // }
+  // pub.publish(tr0);
+  //   // ros::Rate loop_rate(0.002);
+  //   //  loop_rate.sleep();
+  //   }
+
   if(rc>0){
+    double current_joyval=0;
+    for (uint i=0;i<result.data.size();i++){
+      current_joyval  = current_joyval + result.data(i,0);
+      //pre_joyval= pre_joyval+pre_result.data(i,0);
+    }
+    ROS_INFO_STREAM("current_joint sum"<<current_joyval);
+    ROS_INFO_STREAM("pre_joint sum"<<pre_joyval);
+    ROS_INFO_STREAM("joint diff"<<std::abs(std::fabs(current_joyval)-std::fabs(pre_joyval)));
     trajectory_msgs::JointTrajectory tr0;
     tr0.header.frame_id ="base_link";
     tr0.joint_names.resize(6);
-    // tr0.joint_names[0] = "shoulder_pan_joint";
-    // tr0.joint_names[1] = "shoulder_lift_joint";
-    // tr0.joint_names[2] = "elbow_joint";
-    // tr0.joint_names[3] ="wrist_1_joint";
-    // tr0.joint_names[4] ="wrist_2_joint";
-    // tr0.joint_names[5] = "wrist_3_joint";
     tr0.points.resize(1);
     tr0.points[0].positions.resize(6);
-    
-    // tr0.points[0].positions[0]=0;
-    // tr0.points[0].positions[1]=-1.8;
-    // tr0.points[0].positions[2]=0.66;
-    // tr0.points[0].positions[3]=1.14;
-    // tr0.points[0].positions[4]=1.56;
-    // tr0.points[0].positions[5]=-3.14;
     tr0.header.stamp = ros::Time::now();
-    tr0.points[0].time_from_start = ros::Duration(0.5);
-  for(unsigned int i=0; i<chain.getNrOfJoints(); i++)
-	{
-    tr0.joint_names[i] = chain.getSegment(i).getJoint().getName().c_str();
-    tr0.points[0].positions[i]=result(i);
-  }
-  pub.publish(tr0);
+    tr0.points[0].time_from_start = ros::Duration(0.02);
+
+    if (std::abs(std::fabs(current_joyval)-std::fabs(pre_joyval))){
+
+      for(unsigned int i=0; i<chain.getNrOfJoints(); i++)
+      {
+      tr0.joint_names[i] = chain.getSegment(i).getJoint().getName().c_str();
+      tr0.points[0].positions[i]=result(i);
+      pre_result.data(i,0)=result(i);
+      }
+    pre_joyval=current_joyval;
+   
+    }
+    else{
+      for(unsigned int i=0; i<chain.getNrOfJoints(); i++)
+      {
+      tr0.joint_names[i] = chain.getSegment(i).getJoint().getName().c_str();
+      tr0.points[0].positions[i]=pre_result(i);
+            }
+    }
+     pub.publish(tr0);
   }
 
 
