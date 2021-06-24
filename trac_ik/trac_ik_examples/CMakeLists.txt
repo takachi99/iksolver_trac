@@ -8,6 +8,9 @@ endif()
 find_package(catkin REQUIRED
   COMPONENTS
     trac_ik_lib
+    tf        #ここにtf関係を追加
+    tf2
+    tf2_ros
 )
 
 find_package(PkgConfig REQUIRED)
@@ -78,13 +81,38 @@ target_link_libraries(send_frame
   ${pkg_nlopt_LIBRARIES}
 )
 
+add_executable(pos_force_controller src/pos_force_controller.cpp)
+target_link_libraries(pos_force_controller
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+  ${orocos_kdl_LIBRARIES}
+  ${pkg_nlopt_LIBRARIES}
+)
 
+add_executable(array_pub src/array_pub.cpp)
+target_link_libraries(array_pub
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+  ${orocos_kdl_LIBRARIES}
+  ${pkg_nlopt_LIBRARIES}
+)
+
+
+add_executable(send_frame01 src/send_frame01.cpp)
+target_link_libraries(send_frame01
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+  ${orocos_kdl_LIBRARIES}
+  ${pkg_nlopt_LIBRARIES}
+)
 
 install(TARGETS ik_tests
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+
+
 
 install(DIRECTORY launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
