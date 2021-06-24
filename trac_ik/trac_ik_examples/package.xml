@@ -24,5 +24,6 @@
   <exec_depend>libnlopt-dev</exec_depend>
   <exec_depend>libnlopt0</exec_depend>
   <exec_depend>pr2_description</exec_depend>
-
+  <build_depend>tf</build_depend>
+  <exec_depend>tf</exec_depend>
 </package>
