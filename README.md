@@ -4,18 +4,14 @@ This repository referenced [trak_ik](https://bitbucket.org/traclabs/trac_ik/src/
  [pr2_common](https://github.com/PR2/pr2_common/tree/melodic-devel/pr2_description)is used for ik test example.
  This repository run through ROS.
 
-## Packages:
-preparing...
+## Demo:
+[video](https://www.youtube.com/watch?v=Cliyr5ubmo0)
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/FwCqxHGfHAk" frameborder="0" allowfullscreen></iframe>
 
 ## Dependencies
-* Ubuntu 18.04
+* Ubuntu 18.04, 20.04
 * ROS melodic
-<!-- * [ROS melodic](https://www.ros.org/)  
-* [Gazebo11](http://gazebosim.org/)
-* [unitree_legged_sdk](https://github.com/unitreerobotics)
-* [aliengo_sdk](https://github.com/unitreerobotics) -->
-
 ## Installation
 ~~~
 cd ~/catkin_ws/src
@@ -26,4 +22,26 @@ catkin_make
 source devel/setup.bash
 ~~~
 ## Usage
-preparing...
+## Launch file
+* cartesian position controller.
+  * input : target frame(pose,orientation) from joy stick
+  * output : each targt joit potision solved track_ik
+```
+roslaunch trac_ik_examples send_joy_frame.launch mode:=mode0
+```
+mode:=0\
+upload joy node and raltime ik solver.\
+target frame from joy stick is directory sent realtime_ik node.
+
+
+* cartesian position and force controller
+  * input : target frame(pose,orientation) and force(each axis x,y,z)
+  * target frame treat with pose_and_force_PID_controller
+
+  ```
+  roslaunch trac_ik_examples send_joy_frame.launch mode:=mode1
+  ```
+  and run position and force PID controller.
+  ```
+  rosrun trac_ik_examples poa_force_controller
+  ```
