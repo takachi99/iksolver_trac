@@ -21,7 +21,7 @@ source devel/setup.bash
 ~~~
 
 ## Launch file
-* cartesian position controller.
+* Cartesian position controller.
   * input : target frame(pose,orientation) from joy stick
   * output : each targt joit potision solved track_ik
 ```
@@ -32,7 +32,7 @@ upload joy node and raltime ik solver.\
 target frame from joy stick is directory sent realtime_ik node.
 
 
-* cartesian position and force controller
+* Cartesian position and force controller
   * input : target frame(pose,orientation) and force(each axis x,y,z)
   * target frame treat with pose_and_force_PID_controller
 
@@ -43,5 +43,95 @@ target frame from joy stick is directory sent realtime_ik node.
   ```
   rosrun trac_ik_examples poa_force_controller
   ```
-## Reference
+  
+  ##  Requirements
+  In order to publish target frame, you have to prepare [joystick controller](https://gaming.logicool.co.jp/ja-jp/products/gamepads/f310-gamepad.940-000137.html)
+  
+  If you don't have joy stick controller, you can publish message from terminal
+  ### for position controll
+    * send target frame
+      - msg_type:``geometry_msgs/PoseStamped``
+      - send to : ``/end_effector_pose``
+
+    ```
+    rostopic pub -r 10500 /end_effector_pose geometry_msgs/PoseStamped "header:
+    seq: 0
+    stamp:
+        secs: 0
+        nsecs: 0
+    frame_id: 'base_link'
+    pose:
+    position:
+        x: 0.56
+        y: 0.028
+        z: 0.611
+    orientation:
+        x: 0.0
+        y: 0.0
+        z: 0.0
+        w: 1.0"
+    ```
+    and you run 
+    ```
+    rosrun  trac_ik_examples trac_ik_jointpub03
+    ```
+    instead of ```roslaunch trac_ik_examples send_joy_frame.launch mode:=mode0```
+
+### for position and force controller
+ * send target frame and force.
+   * msg_type:``std_msgs_Float32MultiArray``
+   * send to :```\array```
+    ```
+    rostopic pub  -r 500 /array std_msgs/Float32MultiArray "layout:
+    dim:
+    - label: ''
+        size: 10
+        stride: 0
+    data_offset: 0
+    data:
+    - 0.56
+    - 0.028
+    - 0.611
+    - 0.0
+    - 0.0
+    - 0.0
+    - 1.0
+    - 0.0
+    - 0.0
+    - 0.00
+    "
+    ```
+    and run
+    ```
+    rosrun trac_ik_examples pos_force_controller
+    ```
+    finally  run ik_solver
+    ```
+    rosrun trac_ik_examples trac_ik_jointpub03
+    ```
+    instead of ```roslaunch trac_ik_examples send_joy_frame.launch mode:=mode1```
+
+*  note:each valiable set as
+
+        ```
+        rostopic pub  -r 500 /array std_msgs/Float32MultiArray "layout:
+        dim:
+        - label: ''
+            size: 10
+            stride: 0
+        data_offset: 0
+        data:
+        - pose.x
+        - pose.y
+        - pose.z
+        - rotation.x
+        - rotation.y
+        - rotation.z
+        - rotation.w
+        - force.x
+        - force.y
+        - force.z
+        "
+        ```
+  ## Reference
 * This repository referenced [trac_ik](https://bitbucket.org/traclabs/trac_ik/src/master/)
