@@ -7,7 +7,7 @@ This repository referenced [trak_ik](https://bitbucket.org/traclabs/trac_ik/src/
 ## Demo:
 [video](https://www.youtube.com/watch?v=Cliyr5ubmo0)
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/FwCqxHGfHAk" frameborder="0" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/Cliyr5ubmo0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 ## Dependencies
 * Ubuntu 18.04, 20.04
