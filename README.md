@@ -1,8 +1,4 @@
 # Introduction
-This repository referenced [trak_ik](https://bitbucket.org/traclabs/trac_ik/src/master/) and
- [pr2_common](https://github.com/PR2/pr2_common/tree/melodic-devel/pr2_description).
- [pr2_common](https://github.com/PR2/pr2_common/tree/melodic-devel/pr2_description)is used for ik test example.
- This repository run through ROS.
 
 ## Demo:
 
@@ -23,7 +19,7 @@ cd ~/catkin_ws
 catkin_make
 source devel/setup.bash
 ~~~
-## Usage
+
 ## Launch file
 * cartesian position controller.
   * input : target frame(pose,orientation) from joy stick
@@ -47,3 +43,5 @@ target frame from joy stick is directory sent realtime_ik node.
   ```
   rosrun trac_ik_examples poa_force_controller
   ```
+## Reference
+* This repository referenced [trac_ik](https://bitbucket.org/traclabs/trac_ik/src/master/)
