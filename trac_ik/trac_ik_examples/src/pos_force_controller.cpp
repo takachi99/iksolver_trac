@@ -49,7 +49,7 @@ class pos_force_controller{
     vector<double> current_force{3,0};
     vector<double> force_integral{3,0};
     vector<vector<double>> force_error{{0,0},{0,0},{0,0}};
-    vector<double> force_pid_gain{0.0002,0.0,0.0003};//{P,I,D}//original
+    vector<double> force_pid_gain{0.0002,0.0,0.0003};//{P,I,D}
     //vector<double> force_pid_gain{0.00,0.0,0.00};//{P,I,D}
     geometry_msgs::PoseStamped send_frame;
     geometry_msgs::Point rpy;
@@ -118,15 +118,12 @@ vector<double>  val{3,0};
     {
       val[i]=data[i];
     }
-    
     }
     return val;
-
   }
 
-//pub frame
+//pub frame to ik solver node
 void pos_force_controller::frame_pub(const vector<double> &pose) {
-
     send_frame.header.frame_id=world_frame.frame_id;
     send_frame.pose.position.x=current_pose[0]+pose[0];
     send_frame.pose.position.y=current_pose[1]+pose[1];
@@ -137,27 +134,26 @@ void pos_force_controller::frame_pub(const vector<double> &pose) {
     send_frame.pose.orientation.w= target_orientation[3];
     pub.publish(send_frame);
     ROS_INFO_STREAM("pub_frame"<<"x="<<send_frame.pose.position.x<<" y= "<<send_frame.pose.position.y<<" z= "<<send_frame.pose.position.z);
-
   }
 
 //sub target value
 void pos_force_controller::callback(const std_msgs::Float32MultiArray::ConstPtr& msg){
     if(msg->data.size()!=10){
-    ROS_ERROR("exception error. the size of input data must be 10");
-    exit(EXIT_FAILURE);
+      ROS_ERROR("exception error. the size of input data must be 10");
+      exit(EXIT_FAILURE);
     }
-   target_pose[0]=(msg->data[0]);
-   target_pose[1]=(msg->data[1]);
-   target_pose[2]=(msg->data[2]);
-   target_orientation[0]=msg->data[3];
-   target_orientation[1]=msg->data[4];
-   target_orientation[2]=msg->data[5];
-   target_orientation[3]=msg->data[6];
-   target_force[0]=msg->data[7];
-   target_force[1]=msg->data[8];
-   target_force[2]=msg->data[9];
-  ROS_INFO_STREAM("target_pose x= "<<target_pose[0]<<", y="<<target_pose[1]<<", z= "<<target_pose[2]);
-  ROS_INFO_STREAM("target_force x= "<<target_force[0]<<", y="<<target_force[1]<<", z= "<<target_force[2]);
+    target_pose[0]=(msg->data[0]);
+    target_pose[1]=(msg->data[1]);
+    target_pose[2]=(msg->data[2]);
+    target_orientation[0]=msg->data[3];
+    target_orientation[1]=msg->data[4];
+    target_orientation[2]=msg->data[5];
+    target_orientation[3]=msg->data[6];
+    target_force[0]=msg->data[7];
+    target_force[1]=msg->data[8];
+    target_force[2]=msg->data[9];
+    ROS_INFO_STREAM("target_pose x= "<<target_pose[0]<<", y="<<target_pose[1]<<", z= "<<target_pose[2]);
+    ROS_INFO_STREAM("target_force x= "<<target_force[0]<<", y="<<target_force[1]<<", z= "<<target_force[2]);
 }
 
 //sub current force val
@@ -167,13 +163,13 @@ void pos_force_controller::current_force_callback(const geometry_msgs::WrenchSta
   temp[1]=msg->wrench.force.y;
   temp[2]=msg->wrench.force.z;
   current_force=check_outliner(temp,9.0,-9.0);
-   ROS_INFO_STREAM("current_force x= "<<current_force[0]<<", y="<<current_force[1]<<", z= "<<current_force[2]);
+  ROS_INFO_STREAM("current_force x= "<<current_force[0]<<", y="<<current_force[1]<<", z= "<<current_force[2]);
 }
 
 //pose_PID_controll
 vector<double> pos_force_controller::pose_PID_controller(const vector<double> &target_val, const vector<double> &current_val){
-vector<double> result{3,0.0};
-vector<vector<double>> PID{{0},{0},{0}};
+  vector<double> result{3,0.0};
+  vector<vector<double>> PID{{0},{0},{0}};
   for (uint i=0;i<=target_val.size();i++){
     pose_error[i][0]=pose_error[i][1];
     pose_error[i][1]=-current_val[i]+target_val[i];
@@ -181,7 +177,7 @@ vector<vector<double>> PID{{0},{0},{0}};
     PID[i][0]=pose_pid_gain[0]*pose_error[i][1];//P
     PID[i][1]=pose_pid_gain[1]*pose_integral[i];//I
     PID[i][2]=pose_pid_gain[2]*(pose_error[i][1]-pose_error[i][0]);//D
-     ROS_INFO_STREAM("pose_gain,p= "<<PID[i][0]<<", i="<<PID[i][1]<<", D= "<<PID[i][2]);
+    //ROS_INFO_STREAM("pose_gain,p= "<<PID[i][0]<<", i="<<PID[i][1]<<", D= "<<PID[i][2]);
     result[i]=PID[i][0]+PID[i][1]+PID[i][2];
   }
   return result;
@@ -198,7 +194,7 @@ vector<double> pos_force_controller::force_PID_controller(const vector<double> &
     force_PID[i][0]=force_pid_gain[0]*force_error[i][1];//P
     force_PID[i][1]=force_pid_gain[1]*force_integral[i];//I
     force_PID[i][2]=force_pid_gain[2]*(force_error[i][1]-force_error[i][0]);//D
-    ROS_INFO_STREAM("force_gain,p= "<<force_PID[i][0]<<", i="<<force_PID[i][1]<<", D= "<<force_PID[i][2]);
+    //ROS_INFO_STREAM("force_gain,p= "<<force_PID[i][0]<<", i="<<force_PID[i][1]<<", D= "<<force_PID[i][2]);
     force_result[i]=force_PID[i][0]+force_PID[i][1]+force_PID[i][2];
   }
   return force_result;
@@ -211,27 +207,26 @@ void pos_force_controller::start_pid(){
   vector<double> force_pid_result{3,0};
   vector<double> hole_pid_result{3,0};
 
-force_pid_result=force_PID_controller(target_force,current_force);
-pose_pid_result=pose_PID_controller(target_pose,current_pose);
-ROS_INFO_STREAM("pose_pid_result"<<"x="<<pose_pid_result[0]<<",y="<<pose_pid_result[1]<<",z="<<pose_pid_result[2]);
-ROS_INFO_STREAM("force_pid_result"<<"x="<<force_pid_result[0]<<",y="<<force_pid_result[1]<<",z="<<force_pid_result[2]);
+  force_pid_result=force_PID_controller(target_force,current_force);
+  pose_pid_result=pose_PID_controller(target_pose,current_pose);
+  ROS_INFO_STREAM("pose_pid_result"<<"x="<<pose_pid_result[0]<<",y="<<pose_pid_result[1]<<",z="<<pose_pid_result[2]);
+  ROS_INFO_STREAM("force_pid_result"<<"x="<<force_pid_result[0]<<",y="<<force_pid_result[1]<<",z="<<force_pid_result[2]);
 
-for (uint i=0;i<=2;i++){
-  hole_pid_result[i]=pose_pid_result[i]-force_pid_result[i];
-}
-ROS_INFO_STREAM("hole_pid_result "<<"x="<<hole_pid_result[0]<<",y="<<hole_pid_result[1]<<",z="<<hole_pid_result[2]);
-frame_pub(hole_pid_result);
-
+  for (uint i=0;i<=2;i++){
+    hole_pid_result[i]=pose_pid_result[i]-force_pid_result[i];
+  }
+  ROS_INFO_STREAM("hole_pid_result "<<"x="<<hole_pid_result[0]<<",y="<<hole_pid_result[1]<<",z="<<hole_pid_result[2]);
+  frame_pub(hole_pid_result);
 }
 
 int main( int argc, char** argv )
 {
 
-  ros::init(argc, argv, "pos_force_frame_publisher");
+  ros::init(argc, argv, "pos_force_pid_controller");
 
   pos_force_controller my1;
 
-  ros::Rate loop_rate(500);
+  ros::Rate loop_rate(500);//500Hz
   while (ros::ok())
   {
     my1.start_pid();
