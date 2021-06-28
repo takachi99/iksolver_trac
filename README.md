@@ -25,7 +25,7 @@ source devel/setup.bash
   * input : target frame(pose,orientation) from joy stick
   * output : each targt joit potision solved track_ik
 ```
-roslaunch trac_ik_examples send_joy_frame.launch mode:=mode0
+roslaunch trac_ik_examples send_joy_frame.launch mode:=position
 ```
 mode:=0\
 upload joy node and raltime ik solver.\
@@ -37,7 +37,7 @@ target frame from joy stick is directory sent realtime_ik node.
   * target frame treat with pose_and_force_PID_controller
 
   ```
-  roslaunch trac_ik_examples send_joy_frame.launch mode:=mode1
+  roslaunch trac_ik_examples send_joy_frame.launch mode:=position_and_force
   ```
   and run position and force PID controller.
   ```
