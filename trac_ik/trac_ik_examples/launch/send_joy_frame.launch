@@ -1,12 +1,12 @@
 <launch> 
-  <arg name="mode" default="mode0"/>
+  <arg name="mode" default="position"/>
   
   <node pkg="joy" name="joy_node" type="joy_node"/>
-  <group if="$(eval mode=='mode0')">
+  <group if="$(eval mode=='position')">
     <node pkg="trac_ik_examples" name="send_frame" type="send_frame" output="screen"/>
   </group>
-  <group if="$(eval mode=='mode1')">
+  <group if="$(eval mode=='position_and_force')">
     <node pkg="trac_ik_examples" name="send_frame" type="send_frame01" output="screen"/>
   </group>
-<node pkg="trac_ik_examples" name="track_ik_jointpub" type="trac_ik_jointpub03" output="screen"/>
+<node pkg="trac_ik_examples" name="track_ik_jointpub" type="trac_ik_jointpub" output="screen"/>
 </launch>

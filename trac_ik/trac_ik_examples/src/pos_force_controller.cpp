@@ -43,14 +43,14 @@ class pos_force_controller{
     vector<double> current_pose{3,0};
     vector<double> pose_integral{3,0};
     vector<vector<double>> pose_error{{0,0},{0,0},{0,0}};
-    vector<double> pose_pid_gain{0.08,0.0,0.003};//{P,I,D}
+    vector<double> pose_pid_gain{0.03,0.0,0.003};//{P,I,D}
     //vector<double> pose_pid_gain{0.0,0.0,0.0};//{P,I,D}
     vector<double> target_force{3,0};
     vector<double> current_force{3,0};
     vector<double> force_integral{3,0};
     vector<vector<double>> force_error{{0,0},{0,0},{0,0}};
-    vector<double> force_pid_gain{0.01,0.0,0.002};//{P,I,D}
-
+    vector<double> force_pid_gain{0.0002,0.0,0.0003};//{P,I,D}//original
+    //vector<double> force_pid_gain{0.00,0.0,0.00};//{P,I,D}
     geometry_msgs::PoseStamped send_frame;
     geometry_msgs::Point rpy;
 
@@ -166,7 +166,7 @@ void pos_force_controller::current_force_callback(const geometry_msgs::WrenchSta
   temp[0]=msg->wrench.force.x;
   temp[1]=msg->wrench.force.y;
   temp[2]=msg->wrench.force.z;
-  current_force=check_outliner(temp,1.0,-1.0);
+  current_force=check_outliner(temp,9.0,-9.0);
    ROS_INFO_STREAM("current_force x= "<<current_force[0]<<", y="<<current_force[1]<<", z= "<<current_force[2]);
 }
 

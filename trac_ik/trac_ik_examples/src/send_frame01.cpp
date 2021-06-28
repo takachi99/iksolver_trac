@@ -99,15 +99,15 @@ void Frame_pub::callback(const sensor_msgs::Joy::ConstPtr& data){
     joy_pose.orientation.z=joy_quat.getZ();
     joy_pose.orientation.w=joy_quat.getW();
     if(data->buttons[0]==0){
-    array.data[7]=array.data[7]+data->buttons[2]*0.01;
-    array.data[8]=array.data[8]+data->buttons[3]*0.01;
-    array.data[9]=array.data[9]+data->buttons[1]*0.01;
+    array.data[7]=array.data[7]+data->buttons[2]*1;
+    array.data[8]=array.data[8]+data->buttons[3]*1;
+    array.data[9]=array.data[9]+data->buttons[1]*1;
     }
     else
     {
-    array.data[7]=array.data[7]-data->buttons[2]*0.01;
-    array.data[8]=array.data[8]-data->buttons[3]*0.01;
-    array.data[9]=array.data[9]-data->buttons[1]*0.01;
+    array.data[7]=array.data[7]-data->buttons[2]*1;
+    array.data[8]=array.data[8]-data->buttons[3]*1;
+    array.data[9]=array.data[9]-data->buttons[1]*1;
     }
 
     if(data->buttons[9]==1){
