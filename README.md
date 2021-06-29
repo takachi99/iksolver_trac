@@ -56,7 +56,7 @@ target frame input from joy stick is directory sent realtime_ik node.\
       - send to : ``/end_effector_pose``
 
     ```
-    rostopic pub -r 10500 /end_effector_pose geometry_msgs/PoseStamped "header:
+    rostopic pub -r 500 /end_effector_pose geometry_msgs/PoseStamped "header:
     seq: 0
     stamp:
         secs: 0
