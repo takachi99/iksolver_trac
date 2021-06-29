@@ -10,6 +10,7 @@
 ## Dependencies
 * Ubuntu 18.04, 20.04
 * ROS melodic
+* [universal_robot](https://github.com/ros-industrial/universal_robot)
 ## Installation
 ~~~
 cd ~/catkin_ws/src
@@ -27,10 +28,11 @@ source devel/setup.bash
 ```
 roslaunch trac_ik_examples send_joy_frame.launch mode:=position
 ```
-mode:=0\
-upload joy node and raltime ik solver.\
-target frame from joy stick is directory sent realtime_ik node.
+mode:=position\
+upload joy node and realtime ik solver.\
+target frame input from joy stick is directory sent realtime_ik node.\
 
+ realtime ik solver node is``trac_ik_jointpub.cpp``
 
 * Cartesian position and force controller
   * input : target frame(pose,orientation) and force(each axis x,y,z)
@@ -41,7 +43,7 @@ target frame from joy stick is directory sent realtime_ik node.
   ```
   and run position and force PID controller.
   ```
-  rosrun trac_ik_examples poa_force_controller
+  rosrun trac_ik_examples pos_force_controller
   ```
   
   ##  Requirements
@@ -73,9 +75,9 @@ target frame from joy stick is directory sent realtime_ik node.
     ```
     and you run 
     ```
-    rosrun  trac_ik_examples trac_ik_jointpub03
+    rosrun  trac_ik_examples trac_ik_jointpub
     ```
-    instead of ```roslaunch trac_ik_examples send_joy_frame.launch mode:=mode0```
+    instead of ```roslaunch trac_ik_examples send_joy_frame.launch mode:=position```
 
 ### for position and force controller
  * send target frame and force.
@@ -107,13 +109,12 @@ target frame from joy stick is directory sent realtime_ik node.
     ```
     finally  run ik_solver
     ```
-    rosrun trac_ik_examples trac_ik_jointpub03
+    rosrun trac_ik_examples trac_ik_jointpub
     ```
-    instead of ```roslaunch trac_ik_examples send_joy_frame.launch mode:=mode1```
+    instead of ```roslaunch trac_ik_examples send_joy_frame.launch mode:=position_and_force```
 
-*  note:each valiable set as
-
-        ```
+*  Note : each valuable set as
+      ```
         rostopic pub  -r 500 /array std_msgs/Float32MultiArray "layout:
         dim:
         - label: ''
@@ -132,6 +133,28 @@ target frame from joy stick is directory sent realtime_ik node.
         - force.y
         - force.z
         "
-        ```
+      ```
+      force ranges limited -9<value<9 at ```pos_force_controller.cpp```
+## How to set joint limit
+
+if you use ```roslaunch ur_gazebo ur5.launch limited:=true```, IK provide multiple result.
+For this reason, Robot may be vibrate.
+
+One of the most simple solution is  editing  joint limits at ```ur5_joint_limited_robot.urdf.xacro```.
+
+```
+  <!-- arm -->
+  <xacro:ur5_robot prefix="" joint_limited="true"
+    shoulder_pan_lower_limit="${-pi/4.0}" shoulder_pan_upper_limit="${pi/4.0}"
+    shoulder_lift_lower_limit="${-pi}" shoulder_lift_upper_limit="${pi*0.0}"
+    elbow_joint_lower_limit="${-pi*0.0}" elbow_joint_upper_limit="${pi}"
+    wrist_1_lower_limit="${-pi*1.3}" wrist_1_upper_limit="${-pi/3.0}"
+    wrist_2_lower_limit="${-pi}" wrist_2_upper_limit="${pi*0.0}"
+    wrist_3_lower_limit="${-pi}" wrist_3_upper_limit="${pi}"
+    transmission_hw_interface="$(arg transmission_hw_interface)"
+  />
+```
+
+
   ## Reference
-* This repository referenced [trac_ik](https://bitbucket.org/traclabs/trac_ik/src/master/)
+* This repository reference [trac_ik](https://bitbucket.org/traclabs/trac_ik/src/master/)
