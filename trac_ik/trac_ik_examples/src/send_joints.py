@@ -12,7 +12,7 @@ import rospy
 def main():
 
     rospy.init_node('send_joints')
-    pub = rospy.Publisher('/arm_controller/command',
+    pub = rospy.Publisher('/pos_joint_traj_controller/command',
                           JointTrajectory,
                           queue_size=10)
 

@@ -8,5 +8,5 @@
   <group if="$(eval mode=='position_and_force')">
     <node pkg="trac_ik_examples" name="send_frame" type="send_frame01" output="screen"/>
   </group>
-<node pkg="trac_ik_examples" name="track_ik_jointpub" type="trac_ik_jointpub" output="screen"/>
+<!-- <node pkg="trac_ik_examples" name="track_ik_jointpub" type="trac_ik_jointpub" output="screen"/> -->
 </launch>

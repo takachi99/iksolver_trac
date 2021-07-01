@@ -41,10 +41,10 @@ My_joint_pub::My_joint_pub(){\
 
   nh.param("urdf_param", urdf_param, std::string("/robot_description"));//road urdf parametar from ROS
   chain_start = "base_link";//set chain start link link name corresponds urdf file
-  chain_end = "ee_link";//set chain end link
+  chain_end = "tool0";//set chain end link
   timeout = 0.002;//solvet time out 0.002=500Hz
   eps = 1e-4;//terrance
-  pub = nh.advertise<trajectory_msgs::JointTrajectory>("arm_controller/command", 10);//set  each joint position publisher
+  pub = nh.advertise<trajectory_msgs::JointTrajectory>("/pos_joint_traj_controller/command", 10);//set  each joint position publisher
   sub = nh.subscribe("end_effector_pose", 10, &My_joint_pub::callback,this);// set subscriber listen end effector frame
 }
 
@@ -72,13 +72,13 @@ void My_joint_pub::find_IK(const KDL::Frame &end_effector_pose){
   assert(chain.getNrOfJoints() == ul.data.size());
 
   /*chechk model*/
-  // ROS_INFO("Using %d joints!", chain.getNrOfJoints());
-  // for(unsigned int i=0; i<chain.getNrOfJoints(); i++)
-	// {
-	// 	ROS_INFO("joint_name[%d]: %s", i, chain.getSegment(i).getJoint().getName().c_str());
-	// 	ROS_INFO_STREAM("lower_joint_limits:"<<ll.data(i,0));
-  //   ROS_INFO_STREAM("upper_joint_limits:"<<ul.data(i,0));
-  // }
+  ROS_INFO("Using %d joints!", chain.getNrOfJoints());
+  for(unsigned int i=0; i<chain.getNrOfJoints(); i++)
+	{
+		ROS_INFO("joint_name[%d]: %s", i, chain.getSegment(i).getJoint().getName().c_str());
+		//ROS_INFO_STREAM("lower_joint_limits:"<<ll.data(i,0));
+    //ROS_INFO_STREAM("upper_joint_limits:"<<ul.data(i,0));
+  }
 
 
   // Create Nominal chain configuration midway between all joint limits
@@ -107,7 +107,7 @@ void My_joint_pub::find_IK(const KDL::Frame &end_effector_pose){
     tr0.header.stamp = ros::Time::now();
     tr0.points[0].time_from_start = ros::Duration(0.02);
     for(unsigned int i=0; i<chain.getNrOfJoints(); i++){
-        tr0.joint_names[i] = chain.getSegment(i).getJoint().getName().c_str();
+        tr0.joint_names[i] = chain.getSegment(i+1).getJoint().getName().c_str();
         tr0.points[0].positions[i]=result(i);
       }
      pub.publish(tr0);
