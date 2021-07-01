@@ -44,6 +44,7 @@ My_joint_pub::My_joint_pub(){\
   chain_end = "tool0";//set chain end link
   timeout = 0.002;//solvet time out 0.002=500Hz
   eps = 1e-4;//terrance
+  //pub = nh.advertise<trajectory_msgs::JointTrajectory>("/scaled_pos_joint_traj_controller/command", 10);//set  each joint position publisher
   pub = nh.advertise<trajectory_msgs::JointTrajectory>("/pos_joint_traj_controller/command", 10);//set  each joint position publisher
   sub = nh.subscribe("end_effector_pose", 10, &My_joint_pub::callback,this);// set subscriber listen end effector frame
 }
