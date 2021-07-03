@@ -21,6 +21,8 @@ class Frame_pub{
     geometry_msgs::Point rpy;
     std_msgs::Float32MultiArray array;
     tf::Quaternion rpy_to_tf_quat(double roll, double pitch, double yaw);
+    geometry_msgs::Point orientation_count(double x, double y, double z);
+  private:
   private:
     ros::NodeHandle nh;
     ros::Subscriber sub;
@@ -28,6 +30,7 @@ class Frame_pub{
     ros::Publisher pub1;
 
     geometry_msgs::Pose joy_pose;
+    geometry_msgs::Point rpy_diff;
     geometry_msgs::PoseStamped target_pose;
 
      };
@@ -38,27 +41,45 @@ Frame_pub::Frame_pub()
     pub = nh.advertise<std_msgs::Float32MultiArray>("/array", 1);
     pub1 = nh.advertise<geometry_msgs::PoseStamped>("target_frame",1);
     array.data.resize(10);
-    array.data[0] = 0.36;//x
-    array.data[1] = 0.109;//y
-    array.data[2] = 0.5;//z
+    array.data[0] = -0.167;//x
+    array.data[1] = 0.516;//y
+    array.data[2] = 0.7;//z
 
-    array.data[3] = 0.0;
+    array.data[3] = -0.707;
     array.data[4] = 0.0;
     array.data[5] = 0.0;
-    array.data[6] = 1.0;
+    array.data[6] = 0.707;
+
+    joy_pose.orientation.x= -0.707;
+    joy_pose.orientation.y= 0.0;
+    joy_pose.orientation.z= 0.0;
+    joy_pose.orientation.w= 0.707;
+    
 
     array.data[7] = 0.0;
     array.data[8] = 0.0;
     array.data[9] = 0.0;
 
 }
+
 tf::Quaternion Frame_pub::rpy_to_tf_quat(double roll, double pitch, double yaw){
-  rpy.x=rpy.x+roll;
-  rpy.y=rpy.y+pitch;
-  rpy.z=rpy.z+yaw;
-  // ROS_INFO_STREAM("r="<<rpy.x<<",p="<<rpy.y<<",z"<<rpy.z);
+  geometry_msgs::Point rpy;
+  rpy.x=(roll)*(M_PI/180);
+  rpy.y=(pitch)*(M_PI/180);
+  rpy.z=(yaw)*(M_PI/180);
+  ROS_INFO_STREAM("rpy-"<<rpy.x<<rpy.y<<rpy.z);
     return tf::createQuaternionFromRPY(rpy.x, rpy.y, rpy.z);
 }
+
+geometry_msgs::Point Frame_pub::orientation_count(double x, double y, double z){
+  rpy_diff.x=rpy_diff.x+x;
+  rpy_diff.y=rpy_diff.y+y;
+  rpy_diff.z=rpy_diff.z+z;
+  ROS_INFO_STREAM("rpy_diff"<<rpy_diff.x<<rpy_diff.y<<rpy_diff.z);
+  return rpy_diff;
+}
+
+
 void Frame_pub::frame_pub() {
 
     array.data[0] = array.data[0]+joy_pose.position.x;
@@ -90,10 +111,11 @@ void Frame_pub::frame_pub() {
   }
 
 void Frame_pub::callback(const sensor_msgs::Joy::ConstPtr& data){
-    joy_pose.position.z= int(data->axes[1])*0.0001;
-    joy_pose.position.x= (-1.0*data->axes[0])*0.0001;
-    joy_pose.position.y= (1.0*data->axes[7])*0.0001;
-    tf::Quaternion joy_quat=rpy_to_tf_quat(int(data->axes[3])*0.05,int(data->axes[4])*0.05,int(data->axes[6])*0.05);
+    joy_pose.position.z= (data->axes[7])*0.0003;
+    joy_pose.position.x= (data->axes[0])*0.0003;
+    joy_pose.position.y= (data->axes[1])*0.0003;
+    geometry_msgs::Point diff=orientation_count((data->axes[4])*0.5,(data->axes[6])*0.5,(data->axes[3])*0.5);
+    tf::Quaternion joy_quat=rpy_to_tf_quat(-90+diff.x,0+diff.y,0+diff.z);
     joy_pose.orientation.x=joy_quat.getX();
     joy_pose.orientation.y=joy_quat.getY();
     joy_pose.orientation.z=joy_quat.getZ();

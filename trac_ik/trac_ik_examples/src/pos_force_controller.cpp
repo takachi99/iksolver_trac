@@ -77,7 +77,7 @@ pos_force_controller::pos_force_controller():nh(), tfBuffer_(), tfListener_(tfBu
   timer_ = nh.createTimer(ros::Duration(0.0001), [&](const ros::TimerEvent& e) {
     geometry_msgs::TransformStamped transformStamped;
     try{
-      transformStamped = tfBuffer_.lookupTransform("base_link", "ee_link", ros::Time(0));
+      transformStamped = tfBuffer_.lookupTransform("base_link", "tool0", ros::Time(0));
       }
     catch (tf2::TransformException& ex){
       ROS_WARN("error->%s", ex.what());
@@ -89,6 +89,7 @@ pos_force_controller::pos_force_controller():nh(), tfBuffer_(), tfListener_(tfBu
     current_pose[1]=transformStamped.transform.translation.y;
     current_pose[2]=transformStamped.transform.translation.z;
     // ROS_INFO_STREAM("world->ee_link.trans:"<<transformStamped.transform.rotation);
+    //ROS_INFO_STREAM("headr_frame_id x= "<<world_frame.frame_id);
     ROS_INFO_STREAM("current_pose x= "<<current_pose[0]<<", y="<<current_pose[1]<<", z= "<<current_pose[2]);
     });
 

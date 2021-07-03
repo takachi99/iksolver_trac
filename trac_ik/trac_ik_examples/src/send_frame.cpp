@@ -36,21 +36,19 @@ class Frame_pub{
     ros::Publisher pub;
     geometry_msgs::Pose joy_pose;
     geometry_msgs::Point rpy_diff;
-
-
      };
 
 Frame_pub::Frame_pub()
 
 {   sub = nh.subscribe("joy", 10, &Frame_pub::callback,this);
     pub = nh.advertise<geometry_msgs::PoseStamped>("/end_effector_pose", 1);
-    pos.pose.position.x=-0.154;
-    pos.pose.position.y=0.4;
-    pos.pose.position.z=0.784;
-    pos.pose.orientation.x= -0.491;
-    pos.pose.orientation.y= 0.601;
-    pos.pose.orientation.z= -0.422;
-    pos.pose.orientation.w= 0.469;
+    pos.pose.position.x=-0.167;
+    pos.pose.position.y=0.516;
+    pos.pose.position.z=0.7;
+    joy_pose.orientation.x= -0.707;
+    joy_pose.orientation.y= 0.0;
+    joy_pose.orientation.z= 0.0;
+    joy_pose.orientation.w= 0.707;
     // rpy.x=0;
     // rpy.y=90;
     // tf::Quaternion joy_quat2=rpy_to_tf_quat(-1.58,0,-1.1);
@@ -95,11 +93,11 @@ void Frame_pub::frame_pub() {
   }
 
 void Frame_pub::callback(const sensor_msgs::Joy::ConstPtr& data){
-    joy_pose.position.z= int(data->axes[1])*0.0003;
-    joy_pose.position.x= (-1.0*data->axes[0])*0.0003;
-    joy_pose.position.y= (1.0*data->axes[7])*0.0003;
+    joy_pose.position.z= (data->axes[7])*0.0003;
+    joy_pose.position.x= (data->axes[0])*0.0003;
+    joy_pose.position.y= (data->axes[1])*0.0003;
     //tf::Quaternion joy_quat=rpy_to_tf_quat(int(data->axes[3])*0.05,int(data->axes[4])*0.05,int(data->axes[6])*0.05);
-    geometry_msgs::Point diff=orientation_count((data->axes[3])*0.5,(data->axes[4])*0.5,(data->axes[6])*0.5);
+    geometry_msgs::Point diff=orientation_count((data->axes[4])*0.5,(data->axes[6])*0.5,(data->axes[3])*0.5);
       tf::Quaternion joy_quat=rpy_to_tf_quat(-90+diff.x,0+diff.y,0+diff.z);
     joy_pose.orientation.x=joy_quat.getX();
     joy_pose.orientation.y=joy_quat.getY();
