@@ -41,9 +41,9 @@ Frame_pub::Frame_pub()
     pub = nh.advertise<std_msgs::Float32MultiArray>("/array", 1);
     pub1 = nh.advertise<geometry_msgs::PoseStamped>("target_frame",1);
     array.data.resize(10);
-    array.data[0] = -0.167;//x
-    array.data[1] = 0.516;//y
-    array.data[2] = 0.7;//z
+    array.data[0] = -0.129;//x
+    array.data[1] = 0.392;//y
+    array.data[2] = 0.524;//z
 
     array.data[3] = -0.707;
     array.data[4] = 0.0;
@@ -111,9 +111,9 @@ void Frame_pub::frame_pub() {
   }
 
 void Frame_pub::callback(const sensor_msgs::Joy::ConstPtr& data){
-    joy_pose.position.z= (data->axes[7])*0.0003;
-    joy_pose.position.x= (data->axes[0])*0.0003;
-    joy_pose.position.y= (data->axes[1])*0.0003;
+    joy_pose.position.z= (data->axes[1])*0.0003;
+    joy_pose.position.x= (data->axes[7])*0.0003;
+    joy_pose.position.y= (data->axes[0])*0.0003;
     geometry_msgs::Point diff=orientation_count((data->axes[4])*0.5,(data->axes[6])*0.5,(data->axes[3])*0.5);
     tf::Quaternion joy_quat=rpy_to_tf_quat(-90+diff.x,0+diff.y,0+diff.z);
     joy_pose.orientation.x=joy_quat.getX();

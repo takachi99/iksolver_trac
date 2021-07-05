@@ -21,11 +21,12 @@
  #include <tf/transform_broadcaster.h>
 
 #include <cmath>
-
+using namespace std;
 class My_joint_pub{
 
   public:
     My_joint_pub();
+    string controller_type;
 
   private:
     void callback(const geometry_msgs::PoseStamped::ConstPtr& data);
@@ -37,15 +38,19 @@ class My_joint_pub{
     ros::Publisher pub;
      };
 
-My_joint_pub::My_joint_pub(){\
+My_joint_pub::My_joint_pub(){
 
+  ros::NodeHandle pnh("~");
+  controller_type="/scaled_pos_joint_traj_controller/command";
+  pnh.getParam("cont_topic", controller_type);
   nh.param("urdf_param", urdf_param, std::string("/robot_description"));//road urdf parametar from ROS
   chain_start = "base_link";//set chain start link link name corresponds urdf file
   chain_end = "tool0";//set chain end link
-  timeout = 0.002;//solvet time out 0.002=500Hz
+  timeout = 0.0015;//solvet time out 0.002=500Hz
   eps = 1e-4;//terrance
-  //pub = nh.advertise<trajectory_msgs::JointTrajectory>("/scaled_pos_joint_traj_controller/command", 10);//set  each joint position publisher
-  pub = nh.advertise<trajectory_msgs::JointTrajectory>("/pos_joint_traj_controller/command", 10);//set  each joint position publisher
+  pub = nh.advertise<trajectory_msgs::JointTrajectory>(controller_type, 10);//set controller comand from launch arg
+  //pub = nh.advertise<trajectory_msgs::JointTrajectory>("/scaled_pos_joint_traj_controller/command", 10);// real robot controll topic
+  //pub = nh.advertise<trajectory_msgs::JointTrajectory>("/pos_joint_traj_controller/command", 10);//sim robot controll topic
   sub = nh.subscribe("end_effector_pose", 10, &My_joint_pub::callback,this);// set subscriber listen end effector frame
 }
 
@@ -80,7 +85,7 @@ void My_joint_pub::find_IK(const KDL::Frame &end_effector_pose){
 		//ROS_INFO_STREAM("lower_joint_limits:"<<ll.data(i,0));
     //ROS_INFO_STREAM("upper_joint_limits:"<<ul.data(i,0));
   }
-
+    ROS_INFO_STREAM("controller_type"<<controller_type);
 
   // Create Nominal chain configuration midway between all joint limits
   KDL::JntArray nominal(chain.getNrOfJoints());
@@ -94,9 +99,9 @@ void My_joint_pub::find_IK(const KDL::Frame &end_effector_pose){
   int rc=0;
   rc = tracik_solver.CartToJnt(nominal, end_effector_pose, result);//rc>0, IK solusion Found
   ROS_INFO_STREAM("trac ik result="<<rc);
-  for (uint i=0;i<result.data.size();i++){
-  ROS_INFO_STREAM("IK_result.data("<<i<<",0)="<<result.data(i,0));
-    }
+  // for (uint i=0;i<result.data.size();i++){
+  // ROS_INFO_STREAM("IK_result.data("<<i<<",0)="<<result.data(i,0));
+  //   }
 
   if(rc>0){
     //set publish message

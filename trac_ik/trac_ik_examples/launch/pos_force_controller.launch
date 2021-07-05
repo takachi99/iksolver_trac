@@ -1,0 +1,14 @@
+<launch>
+    <arg name="sim" default="false"/>
+
+    <node pkg="joy" name="joy_node" type="joy_node"/>
+    <node pkg="trac_ik_examples" name="send_frame" type="send_frame01" output="screen"/>
+
+    <group if="$(arg sim)">
+        <param name="force_convert/ft_sensor_topic" value="/ft_sensor/raw"/>
+        <param name="track_ik_jointpub/cont_topic" value="/pos_joint_traj_controller/command"/>
+    </group>
+    <node pkg="trac_ik_examples" name="force_convert" type="force_convert" output="screen"/>
+    <node pkg="trac_ik_examples" name="pos_force_controller" type="pos_force_controller"/>
+    <node pkg="trac_ik_examples" name="track_ik_jointpub" type="trac_ik_jointpub"/>
+</launch>

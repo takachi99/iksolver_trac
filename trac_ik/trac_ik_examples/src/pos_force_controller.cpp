@@ -25,9 +25,9 @@ class pos_force_controller{
   public:
     pos_force_controller();
     void start_pid();
-    
   private:
     ros::NodeHandle nh;
+
     ros::Subscriber sub;
     ros::Subscriber current_force_sub;
     ros::Publisher pub;
@@ -68,21 +68,23 @@ class pos_force_controller{
 
 pos_force_controller::pos_force_controller():nh(), tfBuffer_(), tfListener_(tfBuffer_)
 {
-  
   sub = nh.subscribe("array", 10, &pos_force_controller::callback,this); //subscribe input data
   pub = nh.advertise<geometry_msgs::PoseStamped>("/end_effector_pose", 1); //pub frame to ik solver node
-  current_force_sub = nh.subscribe("/ft_sensor/raw",10,&pos_force_controller::current_force_callback,this);//subscribe ft_sensor
+  //current_force_sub = nh.subscribe(ft_sensor_name,10,&pos_force_controller::current_force_callback,this);//subscribe ft_sensor
  
   //get end effector frame
   timer_ = nh.createTimer(ros::Duration(0.0001), [&](const ros::TimerEvent& e) {
     geometry_msgs::TransformStamped transformStamped;
+    geometry_msgs::TransformStamped force_transform;
     try{
       transformStamped = tfBuffer_.lookupTransform("base_link", "tool0", ros::Time(0));
+      force_transform = tfBuffer_.lookupTransform("base_link", "force_link", ros::Time(0));
       }
     catch (tf2::TransformException& ex){
       ROS_WARN("error->%s", ex.what());
       return;
     }
+
     //copy to geometry_msgs::PoseStamped current_pose
     world_frame.frame_id=transformStamped.header.frame_id;
     current_pose[0]=transformStamped.transform.translation.x;
@@ -91,6 +93,14 @@ pos_force_controller::pos_force_controller():nh(), tfBuffer_(), tfListener_(tfBu
     // ROS_INFO_STREAM("world->ee_link.trans:"<<transformStamped.transform.rotation);
     //ROS_INFO_STREAM("headr_frame_id x= "<<world_frame.frame_id);
     ROS_INFO_STREAM("current_pose x= "<<current_pose[0]<<", y="<<current_pose[1]<<", z= "<<current_pose[2]);
+
+    vector<double> temp{3,0};
+    temp[0]=force_transform.transform.translation.x;
+    temp[1]=force_transform.transform.translation.y;
+    temp[2]=force_transform.transform.translation.z;
+    current_force=check_outliner(temp,9.0,-9.0);
+    ROS_INFO_STREAM("current_force x= "<<current_force[0]<<", y="<<current_force[1]<<", z= "<<current_force[2]);
+  
     });
 
 }
@@ -216,6 +226,9 @@ void pos_force_controller::start_pid(){
   for (uint i=0;i<=2;i++){
     hole_pid_result[i]=pose_pid_result[i]-force_pid_result[i];
   }
+  // hole_pid_result[0]=pose_pid_result[0]-force_pid_result[0];
+  // hole_pid_result[1]=pose_pid_result[1]-force_pid_result[1];
+  // hole_pid_result[2]=pose_pid_result[2]-force_pid_result[2];
   ROS_INFO_STREAM("hole_pid_result "<<"x="<<hole_pid_result[0]<<",y="<<hole_pid_result[1]<<",z="<<hole_pid_result[2]);
   frame_pub(hole_pid_result);
 }
@@ -227,7 +240,7 @@ int main( int argc, char** argv )
 
   pos_force_controller my1;
 
-  ros::Rate loop_rate(500);//500Hz
+  ros::Rate loop_rate(600);//500Hz
   while (ros::ok())
   {
     my1.start_pid();

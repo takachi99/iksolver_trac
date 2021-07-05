@@ -42,9 +42,9 @@ Frame_pub::Frame_pub()
 
 {   sub = nh.subscribe("joy", 10, &Frame_pub::callback,this);
     pub = nh.advertise<geometry_msgs::PoseStamped>("/end_effector_pose", 1);
-    pos.pose.position.x=-0.167;
-    pos.pose.position.y=0.516;
-    pos.pose.position.z=0.7;
+    pos.pose.position.x=-0.129;
+    pos.pose.position.y=0.392;
+    pos.pose.position.z=0.524;
     joy_pose.orientation.x= -0.707;
     joy_pose.orientation.y= 0.0;
     joy_pose.orientation.z= 0.0;
@@ -93,9 +93,9 @@ void Frame_pub::frame_pub() {
   }
 
 void Frame_pub::callback(const sensor_msgs::Joy::ConstPtr& data){
-    joy_pose.position.z= (data->axes[7])*0.0003;
-    joy_pose.position.x= (data->axes[0])*0.0003;
-    joy_pose.position.y= (data->axes[1])*0.0003;
+    joy_pose.position.z= (data->axes[1])*0.0003;
+    joy_pose.position.x= (data->axes[7])*0.0003;
+    joy_pose.position.y= (data->axes[0])*0.0003;
     //tf::Quaternion joy_quat=rpy_to_tf_quat(int(data->axes[3])*0.05,int(data->axes[4])*0.05,int(data->axes[6])*0.05);
     geometry_msgs::Point diff=orientation_count((data->axes[4])*0.5,(data->axes[6])*0.5,(data->axes[3])*0.5);
       tf::Quaternion joy_quat=rpy_to_tf_quat(-90+diff.x,0+diff.y,0+diff.z);
