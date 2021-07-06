@@ -79,7 +79,7 @@ int main( int argc, char** argv )
 
   force_convert my1;
 
-  ros::Rate loop_rate(800);//500Hz
+  ros::Rate loop_rate(500);//500Hz
   while (ros::ok())
   {
     my1.broadcast_dynamic_tf();
