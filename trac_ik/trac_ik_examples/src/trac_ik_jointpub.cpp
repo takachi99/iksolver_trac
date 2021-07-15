@@ -78,14 +78,14 @@ void My_joint_pub::find_IK(const KDL::Frame &end_effector_pose){
   assert(chain.getNrOfJoints() == ul.data.size());
 
   /*chechk model*/
-  ROS_INFO("Using %d joints!", chain.getNrOfJoints());
-  for(unsigned int i=0; i<chain.getNrOfJoints(); i++)
-	{
-		ROS_INFO("joint_name[%d]: %s", i, chain.getSegment(i).getJoint().getName().c_str());
-		//ROS_INFO_STREAM("lower_joint_limits:"<<ll.data(i,0));
-    //ROS_INFO_STREAM("upper_joint_limits:"<<ul.data(i,0));
-  }
-    ROS_INFO_STREAM("controller_type"<<controller_type);
+  // ROS_INFO("Using %d joints!", chain.getNrOfJoints());
+  // for(unsigned int i=0; i<chain.getNrOfJoints(); i++)
+	// {
+	// 	ROS_INFO("joint_name[%d]: %s", i, chain.getSegment(i).getJoint().getName().c_str());
+	// 	//ROS_INFO_STREAM("lower_joint_limits:"<<ll.data(i,0));
+  //   //ROS_INFO_STREAM("upper_joint_limits:"<<ul.data(i,0));
+  // }
+  // ROS_INFO_STREAM("controller_type"<<controller_type);
 
   // Create Nominal chain configuration midway between all joint limits
   KDL::JntArray nominal(chain.getNrOfJoints());
@@ -118,6 +118,9 @@ void My_joint_pub::find_IK(const KDL::Frame &end_effector_pose){
       }
      pub.publish(tr0);
     }
+  else{
+    ROS_FATAL("can not find solution follow previous solution");
+  }
   }
 
 
