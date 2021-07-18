@@ -122,6 +122,13 @@ target_link_libraries(external_force_frame_pub
   ${pkg_nlopt_LIBRARIES}
 )
 
+add_executable(pf_hyb_controller src/pf_hyb_controller.cpp)
+target_link_libraries(pf_hyb_controller
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+  ${orocos_kdl_LIBRARIES}
+  ${pkg_nlopt_LIBRARIES}
+)
 
 install(TARGETS ik_tests
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

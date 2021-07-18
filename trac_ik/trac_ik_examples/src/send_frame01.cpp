@@ -37,7 +37,7 @@ class Frame_pub{
 
 Frame_pub::Frame_pub()
 
-{   sub = nh.subscribe("joy", 10, &Frame_pub::callback,this);
+{   sub = nh.subscribe("joy", 1, &Frame_pub::callback,this);
     pub = nh.advertise<std_msgs::Float32MultiArray>("/array", 1);
     pub1 = nh.advertise<geometry_msgs::PoseStamped>("target_frame",1);
     array.data.resize(10);
@@ -106,7 +106,7 @@ void Frame_pub::frame_pub() {
     target_pose.pose.orientation.w=array.data[6];
     pub.publish(array);
     pub1.publish(target_pose);
-    ROS_INFO_STREAM("target_frame"<<target_pose);
+    // ROS_INFO_STREAM("target_frame"<<target_pose);
     ROS_INFO_STREAM("target_force\n"<<"x="<<array.data[7]<<",y="<<array.data[8]<<",z="<<array.data[9]);
   }
 
@@ -121,15 +121,15 @@ void Frame_pub::callback(const sensor_msgs::Joy::ConstPtr& data){
     joy_pose.orientation.z=joy_quat.getZ();
     joy_pose.orientation.w=joy_quat.getW();
     if(data->buttons[0]==0){
-    array.data[7]=array.data[7]+data->buttons[2]*1;
-    array.data[8]=array.data[8]+data->buttons[3]*1;
-    array.data[9]=array.data[9]+data->buttons[1]*1;
+    array.data[7]=array.data[7]+data->buttons[2]*5;
+    array.data[8]=array.data[8]+data->buttons[3]*5;
+    array.data[9]=array.data[9]+data->buttons[1]*5;
     }
     else
     {
-    array.data[7]=array.data[7]-data->buttons[2]*1;
-    array.data[8]=array.data[8]-data->buttons[3]*1;
-    array.data[9]=array.data[9]-data->buttons[1]*1;
+    array.data[7]=array.data[7]-data->buttons[2]*5;
+    array.data[8]=array.data[8]-data->buttons[3]*5;
+    array.data[9]=array.data[9]-data->buttons[1]*5;
     }
 
     if(data->buttons[9]==1){

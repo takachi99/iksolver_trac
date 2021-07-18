@@ -47,11 +47,11 @@ My_joint_pub::My_joint_pub(){
   chain_start = "base_link";//set chain start link link name corresponds urdf file
   chain_end = "tool0";//set chain end link
   timeout = 0.0015;//solvet time out 0.002=500Hz
-  eps = 1e-10;//terrance
-  pub = nh.advertise<trajectory_msgs::JointTrajectory>(controller_type, 10);//set controller comand from launch arg
+  eps = 1e-5;//terrance
+  pub = nh.advertise<trajectory_msgs::JointTrajectory>(controller_type, 1);//set controller comand from launch arg
   //pub = nh.advertise<trajectory_msgs::JointTrajectory>("/scaled_pos_joint_traj_controller/command", 10);// real robot controll topic
   //pub = nh.advertise<trajectory_msgs::JointTrajectory>("/pos_joint_traj_controller/command", 10);//sim robot controll topic
-  sub = nh.subscribe("end_effector_pose", 10, &My_joint_pub::callback,this);// set subscriber listen end effector frame
+  sub = nh.subscribe("end_effector_pose", 1, &My_joint_pub::callback,this);// set subscriber listen end effector frame
 }
 
 void My_joint_pub::find_IK(const KDL::Frame &end_effector_pose){
@@ -111,16 +111,13 @@ void My_joint_pub::find_IK(const KDL::Frame &end_effector_pose){
     tr0.points.resize(1);
     tr0.points[0].positions.resize(6);
     tr0.header.stamp = ros::Time::now();
-    tr0.points[0].time_from_start = ros::Duration(0.02);
+    tr0.points[0].time_from_start = ros::Duration(0.002);
     for(unsigned int i=0; i<chain.getNrOfJoints(); i++){
         tr0.joint_names[i] = chain.getSegment(i+1).getJoint().getName().c_str();
         tr0.points[0].positions[i]=result(i);
       }
      pub.publish(tr0);
     }
-  else{
-    ROS_FATAL("can not find solution follow previous solution");
-  }
   }
 
 
@@ -141,7 +138,7 @@ int main( int argc, char** argv )
 
   My_joint_pub my1;
 
-  ros::Rate loop_rate(500);
+  ros::Rate loop_rate(800);
   while (ros::ok()){
       ros::spinOnce();
       loop_rate.sleep();
