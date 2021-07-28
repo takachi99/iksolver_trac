@@ -135,7 +135,7 @@ force_convert::force_convert():nh(), tfBuffer_(), tfListener_(tfBuffer_)
   pnh.getParam("ft_sensor_topic", ft_sensor_name);
   current_force_sub = nh.subscribe(ft_sensor_name,1,&force_convert::current_force_callback,this);//subscribe ft_sensor
   pub = nh.advertise<geometry_msgs::WrenchStamped>("/LowPass_filtered_wrench", 1); //pub frame to ik solver node
-  a=0.95;
+  a=0.7;
 }
 
 //sub current force val

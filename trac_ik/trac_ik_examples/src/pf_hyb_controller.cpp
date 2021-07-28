@@ -31,6 +31,7 @@ class pos_force_controller{
     ros::Subscriber sub;
     ros::Subscriber current_force_sub;
     ros::Publisher pub;
+    ros::Publisher pub_2;
 
     ros::Timer timer_;
     tf2_ros::Buffer tfBuffer_;
@@ -71,6 +72,8 @@ class pos_force_controller{
 
 pos_force_controller::pos_force_controller():nh(), tfBuffer_(), tfListener_(tfBuffer_)
 {
+    pub_2 = nh.advertise<geometry_msgs::Point>("/end_effector_point", 1); 
+
   //current_force_sub = nh.subscribe(ft_sensor_name,10,&pos_force_controller::current_force_callback,this);//subscribe ft_sensor
   pose_pid_gain = default_pose_pid_gain;
   force_pid_gain = default_force_pid_gain;
@@ -112,7 +115,13 @@ pos_force_controller::pos_force_controller():nh(), tfBuffer_(), tfListener_(tfBu
     temp[2]=force_transform.transform.translation.z;
     current_force=check_outliner(temp,50.0,-50.0);
     ROS_INFO_STREAM("current_force x= "<<current_force[0]<<", y="<<current_force[1]<<", z= "<<current_force[2]);
+    geometry_msgs::Point pout;
+    pout.x =current_pose[0];
+    pout.y =current_pose[1];
+    pout.z =current_pose[2];
+    pub_2.publish(pout);
     });
+
   sub = nh.subscribe("array", 1, &pos_force_controller::callback,this); //subscribe input data
   pub = nh.advertise<geometry_msgs::PoseStamped>("/end_effector_pose", 1); //pub frame to ik solver node
 }
