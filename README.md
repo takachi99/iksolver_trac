@@ -9,7 +9,7 @@
 
 ## Dependencies
 * Ubuntu 18.04, 20.04
-* ROS melodic
+* ROS melodic or noetic
 * [universal_robot](https://github.com/ros-industrial/universal_robot)
 ## Installation
 ~~~
@@ -28,9 +28,10 @@ source devel/setup.bash
 ```
 roslaunch trac_ik_examples send_joy_frame.launch mode:=position
 ```
-mode:=position\
-upload joy node and realtime ik solver.\
-target frame input from joy stick is directory sent realtime_ik node.\
+* lauch argments 
+  * mode:=position
+* upload joy node and realtime ik solver.
+* target frame input from joy stick is directory sent realtime_ik node.
 
  realtime ik solver node is``trac_ik_jointpub.cpp``
 
@@ -135,6 +136,7 @@ target frame input from joy stick is directory sent realtime_ik node.\
         "
       ```
       force ranges limited -9<value<9 at ```pos_force_controller.cpp```
+
 ## How to set joint limit
 
 if you use ```roslaunch ur_gazebo ur5.launch limited:=true```, IK provide multiple result.
