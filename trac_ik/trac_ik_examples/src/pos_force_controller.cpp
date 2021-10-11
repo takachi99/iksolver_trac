@@ -43,16 +43,15 @@ class pos_force_controller{
     vector<double> current_pose{3,0};
     vector<double> pose_integral{3,0};
     vector<vector<double>> pose_error{{0,0},{0,0},{0,0}};
-    // vector<double> pose_pid_gain{0.03,0.0,0.003};//{P,I,D}
-    vector<double> pose_pid_gain{0.06*8.0,0.0,0.001*8.0};//{P,I,D}
+    // vector<double> pose_pid_gain{0.003,0.0,0.0003};//{P,I,D}
+    vector<double> pose_pid_gain{0.06*7.0,0.0,0.001*7.0};//{P,I,D}
     //vector<double> pose_pid_gain{0.0,0.0,0.0};//{P,I,D}
     vector<double> target_force{3,0};
     vector<double> current_force{3,0};
     vector<double> force_integral{3,0};
     vector<vector<double>> force_error{{0,0},{0,0},{0,0}};
-    //vector<double> force_pid_gain{0.00004,0.0,0.0000003};//{P,I,D}
-    vector<double> force_pid_gain{0.0002,0.0,0.0003};//{P,I,D}
-    //vector<double> force_pid_gain{0.00,0.0,0.00};//{P,I,D}
+    // vector<double> force_pid_gain{0.0001*0.1,0.0,0.000024*0.1};//{P,I,D}
+    vector<double> force_pid_gain{0.0001*2,0.0,0.000024*2};//{P,I,D}
     geometry_msgs::PoseStamped send_frame;
     geometry_msgs::Point rpy;
 
