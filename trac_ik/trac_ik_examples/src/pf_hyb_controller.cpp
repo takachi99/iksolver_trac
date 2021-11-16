@@ -52,7 +52,9 @@ class pos_force_controller{
     vector<double> current_force{3,0};
     vector<double> force_integral{3,0};
     vector<vector<double>> force_error{{0,0},{0,0},{0,0}};
-    vector<double> default_force_pid_gain{0.0001*1,0.0,0.000024*1.0};//{P,I,D} for ex
+    // vector<double> default_force_pid_gain{0.0001*1,0.0,0.000024*1.0};//{P,I,D} for ex
+    vector<double> default_force_pid_gain{0.0001*2,0.0,0.000024*2};//{P,I,D} for ex2
+
     // vector<double> default_force_pid_gain{0.0001*0.5,0.0,0.000024*1.0};//{P,I,D} fix
 
     vector<double> force_pid_gain{0.00,0.0,0.00};//{P,I,D}
