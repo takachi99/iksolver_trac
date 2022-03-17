@@ -46,7 +46,7 @@ My_joint_pub::My_joint_pub(){
   nh.param("urdf_param", urdf_param, std::string("/robot_description"));//road urdf parametar from ROS
   chain_start = "base_link";//set chain start link link name corresponds urdf file
   chain_end = "tool0";//set chain end link
-  timeout = 0.0005;//solvet time out 0.002=500Hz
+  timeout = 0.0015;//solvet time out 0.002=500Hz
   eps = 1e-6;//terrance
   pub = nh.advertise<trajectory_msgs::JointTrajectory>(controller_type, 1);//set controller comand from launch arg
   //pub = nh.advertise<trajectory_msgs::JointTrajectory>("/scaled_pos_joint_traj_controller/command", 10);// real robot controll topic
