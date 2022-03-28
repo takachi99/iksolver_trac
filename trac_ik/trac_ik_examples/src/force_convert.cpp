@@ -13,7 +13,7 @@
 #include <geometry_msgs/TransformStamped.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Pose.h>
-#include <std_srvs/Trigger.h>
+
 #include <tf/transform_broadcaster.h>
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2_ros/transform_listener.h>
@@ -27,8 +27,6 @@ class force_convert{
     force_convert();
     void broadcast_dynamic_tf();
     string ft_sensor_name="/wrench";
-
-
   private:
     ros::NodeHandle nh;
     ros::Subscriber sub;
@@ -40,13 +38,9 @@ class force_convert{
     tf2_ros::TransformBroadcaster dynamic_br_;
     geometry_msgs::Point current_force;
     void current_force_callback(const geometry_msgs::WrenchStampedConstPtr& msg);
-    bool zero_ftsensor(std_srvs::Trigger::Request& req,
-                       std_srvs::Trigger::Response& res);
     double a;
 
 };
-
-
 
 force_convert::force_convert():nh(), tfBuffer_(), tfListener_(tfBuffer_)
 {
@@ -54,22 +48,7 @@ force_convert::force_convert():nh(), tfBuffer_(), tfListener_(tfBuffer_)
   pnh.getParam("ft_sensor_topic", ft_sensor_name);
   current_force_sub = nh.subscribe(ft_sensor_name,1,&force_convert::current_force_callback,this);//subscribe ft_sensor
   pub = nh.advertise<geometry_msgs::WrenchStamped>("/LowPass_filtered_wrench", 1); //pub frame to ik solver node
-  ros::ServiceServer service = nh.advertiseService("reset_eSeries_ftsensor", &force_convert::zero_ftsensor,this);
-
   a=0.9;
-}
-
-
-
-
-bool force_convert::zero_ftsensor(std_srvs::Trigger::Request& req,
-                                  std_srvs::Trigger::Response& res)
-{
-//   res.sum = req.a + req.b;
-//   ROS_INFO("request: x=%ld, y=%ld", (long int)req.a, (long int)req.b);
-//   ROS_INFO("sending back response: [%ld]", (long int)res.sum);
-    ROS_INFO_STREAM("target_pose x= "<<req<<"hogeee");
-    return true;
 }
 
 //sub current force val
@@ -79,7 +58,6 @@ void force_convert::current_force_callback(const geometry_msgs::WrenchStampedCon
   current_force.z=a*current_force.z+(1-a)*msg->wrench.force.z;
   ROS_INFO_STREAM("current force = "<<"x="<<current_force.x<<",y="<<current_force.y<<",y="<<current_force.z);
 }
-
 void force_convert::broadcast_dynamic_tf(){
 
     geometry_msgs::WrenchStamped lp_force;
@@ -103,7 +81,7 @@ void force_convert::broadcast_dynamic_tf(){
     transformStamped.transform.rotation.w = q.w();
     dynamic_br_.sendTransform(transformStamped);
 
-
+    
     lp_force.header.frame_id = "wrist_3_link";
     lp_force.wrench.force.x=current_force.x;
     lp_force.wrench.force.y=current_force.y;

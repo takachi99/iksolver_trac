@@ -98,7 +98,6 @@ void My_joint_pub::find_IK(const KDL::Frame &end_effector_pose){
 
   int rc=0;
   rc = tracik_solver.CartToJnt(nominal, end_effector_pose, result);//rc>0, IK solusion Found
-  ROS_INFO_STREAM("trac ik result="<<rc);
   // for (uint i=0;i<result.data.size();i++){
   // ROS_INFO_STREAM("IK_result.data("<<i<<",0)="<<result.data(i,0));
   //   }
@@ -118,6 +117,10 @@ void My_joint_pub::find_IK(const KDL::Frame &end_effector_pose){
       }
      pub.publish(tr0);
     }
+  else{
+    // ROS_INFO_STREAM("trac ik result="<<rc);
+    ROS_WARN_STREAM("trac ik result="<<rc);
+  }
   }
 
 
