@@ -5,7 +5,7 @@
         <param name="track_ik_jointpub/cont_topic" value="/pos_joint_traj_controller/command"/>
     </group>
     <!-- <node pkg="trac_ik_examples" name="force_convert" type="force_convert"/> -->
-    <node pkg="trac_ik_examples" name="ftsensor_trans" type="ftsensor_trans.py" output="screen"/>
+    <node pkg="trac_ik_examples" name="reset_ftsensor" type="reset_ftsensor.py" output="screen"/>
     <node pkg="trac_ik_examples" name="track_ik_jointpub" type="trac_ik_jointpub" output="screen"/>
     <!-- <node pkg="trac_ik_examples" name="pf_hyb_controller" type="pf_hyb_controller" output="screen"/> -->
 </launch>

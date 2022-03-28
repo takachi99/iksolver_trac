@@ -130,14 +130,6 @@ target_link_libraries(pf_hyb_controller
   ${pkg_nlopt_LIBRARIES}
 )
 
-add_executable(reset_ft_sensor src/reset_ft_sensor.cpp)
-target_link_libraries(reset_ft_sensor
-  ${catkin_LIBRARIES}
-  ${Boost_LIBRARIES}
-  ${orocos_kdl_LIBRARIES}
-  ${pkg_nlopt_LIBRARIES}
-)
-
 
 install(TARGETS ik_tests
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
