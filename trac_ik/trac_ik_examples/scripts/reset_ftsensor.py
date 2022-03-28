@@ -67,6 +67,7 @@ class tf2_pub():
         self.current_force.y=data.wrench.force.y;
         self.current_force.z=data.wrench.force.z;
         
+        # print(self.current_force)
         # self.current_force= data
 
     def get_current_force(self):
