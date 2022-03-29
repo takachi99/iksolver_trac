@@ -1,7 +1,7 @@
 <launch>
     <arg name="sim" default="false"/>
     <group if="$(arg sim)">
-        <param name="force_convert/ft_sensor_topic" value="/ft_sensor/raw"/>
+        <param name="reset_ftsensor/ft_sensor_topic" value="/ft_sensor/raw"/>
         <param name="track_ik_jointpub/cont_topic" value="/pos_joint_traj_controller/command"/>
     </group>
     <!-- <node pkg="trac_ik_examples" name="force_convert" type="force_convert"/> -->
