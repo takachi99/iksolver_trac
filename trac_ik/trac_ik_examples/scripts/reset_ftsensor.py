@@ -51,6 +51,10 @@ class tf2_pub():
         ##################################
         rospy.Service("ft_sensor_reset",Trigger,self.ft_reset_trigger)
 
+
+        rospack=rospkg.RosPack()
+        self.package_path=rospack.get_path("trac_ik_examples")
+
         # self.current_force = WrenchStamped()
         self.current_force = Point()
 
@@ -66,7 +70,7 @@ class tf2_pub():
         self.current_force.x=data.wrench.force.x;
         self.current_force.y=data.wrench.force.y;
         self.current_force.z=data.wrench.force.z;
-        
+
         # print(self.current_force)
         # self.current_force= data
 
@@ -75,9 +79,26 @@ class tf2_pub():
 
     def ft_reset_trigger(self,data):
 
-        self.offset_force = copy.copy(self.get_current_force())
+        offset_force = copy.copy(self.get_current_force())
         rospy.loginfo("offset ft sensor :")
-        print(self.offset_force)
+        print(offset_force)
+
+        import yaml
+        obj = { 'force': {  'x': offset_force.x,
+                                'y': offset_force.y,
+                            'z': offset_force.z},}
+
+        save_dir =self.package_path+"/config/"+"ftsensor_offset_"+".yaml"
+
+        with open(save_dir, 'w') as file:
+            yaml.dump(obj, file)
+
+        with open(save_dir) as file:
+            data = yaml.safe_load(file)
+
+        self.offset_force.x = data["force"]['x']
+        self.offset_force.y = data["force"]['y']
+        self.offset_force.z = data["force"]['z']
 
         return TriggerResponse(
             success=True,
