@@ -141,7 +141,8 @@ int main( int argc, char** argv )
 
   My_joint_pub my1;
 
-  ros::Rate loop_rate(800);
+  // ros::Rate loop_rate(800);
+  ros::Rate loop_rate(500);
   while (ros::ok()){
       ros::spinOnce();
       loop_rate.sleep();
