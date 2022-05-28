@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import pathlib
-import numpy as np
 import yaml
 
 import rospy
@@ -27,8 +26,6 @@ sys.path.append(current_dir)
 class tf2_pub():
 
     def __init__(self):
-
-
 
         #################
         # load ros param
@@ -55,24 +52,31 @@ class tf2_pub():
         rospack=rospkg.RosPack()
         self.package_path=rospack.get_path("trac_ik_examples")
 
-        # self.current_force = WrenchStamped()
-        self.current_force = Point()
+        self.current_force = WrenchStamped()
+        self.offset_force  = WrenchStamped()
 
-        self.offset_force  = Point()
+
+        # self.current_force = Point()
+        # self.offset_force  = Point()
 
 
     def current_ft_callback(self,data):
+
         a =0.1
+
         # self.current_force.x=a*self.current_force.x+(1-a)*data.wrench.force.x;
         # self.current_force.y=a*self.current_force.y+(1-a)*data.wrench.force.y;
         # self.current_force.z=a*self.current_force.z+(1-a)*data.wrench.force.z;
 
-        self.current_force.x=data.wrench.force.x;
-        self.current_force.y=data.wrench.force.y;
-        self.current_force.z=data.wrench.force.z;
+        self.current_force.wrench.force.x=data.wrench.force.x;
+        self.current_force.wrench.force.y=data.wrench.force.y;
+        self.current_force.wrench.force.z=data.wrench.force.z;
+
+        self.current_force.wrench.torque.x=data.wrench.torque.x;
+        self.current_force.wrench.torque.y=data.wrench.torque.y;
+        self.current_force.wrench.torque.z=data.wrench.torque.z;
 
         # print(self.current_force)
-        # self.current_force= data
 
     def get_current_force(self):
         return self.current_force
@@ -80,15 +84,17 @@ class tf2_pub():
     def ft_reset_trigger(self,data):
 
         offset_force = copy.copy(self.get_current_force())
-        rospy.loginfo("offset ft sensor :")
+        rospy.loginfo("Offset FT sensor val :")
         print(offset_force)
 
-        import yaml
-        obj = { 'force': {  'x': offset_force.x,
-                                'y': offset_force.y,
-                            'z': offset_force.z},}
+        obj = { 'force': {  'x': offset_force.wrench.force.x,
+                            'y': offset_force.wrench.force.y,
+                            'z': offset_force.wrench.force.z},
+               'torque': {  'x': offset_force.wrench.torque.x,
+                            'y': offset_force.wrench.torque.y,
+                            'z': offset_force.wrench.torque.z},}
 
-        save_dir =self.package_path+"/config/"+"ftsensor_offset_"+".yaml"
+        save_dir =self.package_path+"/config/"+"ft_sensor_offset"+".yaml"
 
         with open(save_dir, 'w') as file:
             yaml.dump(obj, file)
@@ -96,9 +102,13 @@ class tf2_pub():
         with open(save_dir) as file:
             data = yaml.safe_load(file)
 
-        self.offset_force.x = data["force"]['x']
-        self.offset_force.y = data["force"]['y']
-        self.offset_force.z = data["force"]['z']
+        self.offset_force.wrench.force.x  = data["force"]['x']
+        self.offset_force.wrench.force.y  = data["force"]['y']
+        self.offset_force.wrench.force.z  = data["force"]['z']
+        self.offset_force.wrench.torque.x = data["torque"]['x']
+        self.offset_force.wrench.torque.y = data["torque"]['y']
+        self.offset_force.wrench.torque.z = data["torque"]['z']
+
 
         return TriggerResponse(
             success=True,
@@ -114,13 +124,10 @@ class tf2_pub():
         t.header.frame_id = 'wrist_3_link'
         t.child_frame_id = 'force_link'
 
-        # t.transform.translation.x = self.current_force.x
-        # t.transform.translation.y = self.current_force.y
-        # t.transform.translation.z = self.current_force.z
 
-        t.transform.translation.x = self.current_force.x-self.offset_force.x
-        t.transform.translation.y = self.current_force.y-self.offset_force.y
-        t.transform.translation.z = self.current_force.z-self.offset_force.z
+        t.transform.translation.x = self.current_force.wrench.force.x-self.offset_force.wrench.force.x
+        t.transform.translation.y = self.current_force.wrench.force.y-self.offset_force.wrench.force.y
+        t.transform.translation.z = self.current_force.wrench.force.z-self.offset_force.wrench.force.z
 
         q = tf_conversions.transformations.quaternion_from_euler(0., 0., 0.)
         t.transform.rotation.x = q[0]
@@ -131,29 +138,28 @@ class tf2_pub():
         br.sendTransform(t)
         # rospy.loginfo(t)
 
+
         filtered_wrench = WrenchStamped()
+
         filtered_wrench.header.frame_id = "wrist_3_link"
 
-        # filtered_wrench.wrench.force.x=self.current_force.x
-        # filtered_wrench.wrench.force.y=self.current_force.y
-        # filtered_wrench.wrench.force.z=self.current_force.z
+        filtered_wrench.wrench.force.x=self.current_force.wrench.force.x-self.offset_force.wrench.force.x
+        filtered_wrench.wrench.force.y=self.current_force.wrench.force.y-self.offset_force.wrench.force.y
+        filtered_wrench.wrench.force.z=self.current_force.wrench.force.z-self.offset_force.wrench.force.z
 
-        filtered_wrench.wrench.force.x=self.current_force.x-self.offset_force.x
-        filtered_wrench.wrench.force.y=self.current_force.y-self.offset_force.y
-        filtered_wrench.wrench.force.z=self.current_force.z-self.offset_force.z
+        filtered_wrench.wrench.torque.x =self.current_force.wrench.torque.x-self.offset_force.wrench.torque.x
+        filtered_wrench.wrench.torque.y =self.current_force.wrench.torque.y-self.offset_force.wrench.torque.y
+        filtered_wrench.wrench.torque.z =self.current_force.wrench.torque.z-self.offset_force.wrench.torque.z
 
-        filtered_wrench.wrench.torque.x =0
-        filtered_wrench.wrench.torque.y =0
-        filtered_wrench.wrench.torque.z =0
         self.filtered_ftsensor.publish(filtered_wrench)
 
-        rospy.loginfo_once('publish wrench frame')
-        rospy.loginfo_once('publish wrench')
+        rospy.loginfo_once('start publish wrench frame..')
+        rospy.loginfo_once('start publish wrench')
 
-        # rospy.loginfo(filtered_wrench)
+
 if __name__ == '__main__':
 
-    rospy.init_node('model_origin_pub', anonymous=True)
+    rospy.init_node('reset_ft_sensor', anonymous=True)
 
     frame_pub = tf2_pub()
 
