@@ -54,7 +54,7 @@ class pos_force_controller{
     vector<double> force_integral{3,0};
     vector<vector<double>> force_error{{0,0},{0,0},{0,0}};
     // vector<double> default_force_pid_gain{0.0001*1,0.0,0.000024*1.0};//{P,I,D} for ex
-    vector<double> default_force_pid_gain{0.0001*2,0.0,0.000024*2};//{P,I,D} for ex2
+    vector<double> default_force_pid_gain{0.0002*4.5,0.0,0.000024*1};//{P,I,D} for ex2
     vector<double> force_pid_gain{0.00,0.0,0.00};//{P,I,D}
 
   
@@ -62,14 +62,16 @@ class pos_force_controller{
     vector<double> current_torque{3,0};
     vector<double> torque_integral{3,0};
     vector<vector<double>> torque_error{{0,0},{0,0},{0,0}};
-    vector<double> default_torque_pid_gain{0.0001*2,0.0,0.000024*2};//{P,I,D} for ex2
+    vector<double> default_torque_pid_gain{0.01*2,0.0,0.0024*2};//{P,I,D} for ex2
     vector<double> torque_pid_gain{0.00,0.0,0.00};//{P,I,D}
+
+
  
  
     geometry_msgs::PoseStamped send_frame;
     geometry_msgs::Point rpy;
 
-    void frame_pub(const vector<double> &pose);
+    void frame_pub(const vector<double> &pose,const vector<double> &torque);
     void callback(const std_msgs::Float32MultiArray::ConstPtr& msg);
     void current_force_callback(const geometry_msgs::WrenchStampedConstPtr& msg);
     vector<double> pose_PID_controller(const vector<double> &target_val,const vector<double> &current_val);
@@ -181,23 +183,65 @@ vector<double>  val{3,0};
   }
 
 //pub frame to ik solver node
-void pos_force_controller::frame_pub(const vector<double> &pose) {
+void pos_force_controller::frame_pub(const vector<double> &pose ,const vector<double> &torque) {
+
+    vector<double> final_torque{3,0};
+    vector<double> final_orientation{4,0};
+
     send_frame.header.frame_id=world_frame.frame_id;
-    send_frame.pose.position.x=current_pose[0]+pose[0];
-    send_frame.pose.position.y=current_pose[1]+pose[1];
-    send_frame.pose.position.z =current_pose[2]+pose[2];
-    send_frame.pose.orientation.x=target_orientation[0];
-    send_frame.pose.orientation.y= target_orientation[1];
-    send_frame.pose.orientation.z= target_orientation[2];
-    send_frame.pose.orientation.w= target_orientation[3];
+
+    // send_frame.pose.position.x=current_pose[0]+pose[0];
+    // send_frame.pose.position.y=current_pose[1]+pose[1];
+    // send_frame.pose.position.z =current_pose[2]+pose[2];
+
+    send_frame.pose.position.x =target_pose[0]+pose[0];
+    send_frame.pose.position.y =target_pose[1]+pose[1];
+    send_frame.pose.position.z =target_pose[2]+pose[2];
+
+    tf::Quaternion q2(
+        target_orientation[0],
+        target_orientation[1],
+        target_orientation[2],
+        target_orientation[3]);
+    tf::Matrix3x3 m(q2);
+    double roll, pitch, yaw;
+    m.getRPY(roll, pitch, yaw);
+
+    final_torque[0] = roll   -torque[0]*4;
+    final_torque[1] = pitch  -torque[2]*4; //z
+    final_torque[2] = yaw    +torque[1]*4;//y
+
+    ROS_INFO_STREAM("pub_frame"<<"x="<<torque[0]*5<<" y= "<<torque[1]*5<<" z= "<<torque[2]*5);
+
+
+    // final_torque[0] = roll ;
+    // final_torque[1] = pitch;
+    // final_torque[2] = yaw  ;
+
+    tf2::Quaternion q1;
+    q1.setRPY(final_torque[0], final_torque[1],final_torque[2]);
+
+    // send_frame.pose.orientation.x= target_orientation[0];
+    // send_frame.pose.orientation.y= target_orientation[1];
+    // send_frame.pose.orientation.z= target_orientation[2];
+    // send_frame.pose.orientation.w= target_orientation[3];
+
+
+    send_frame.pose.orientation.x= q1.x();
+    send_frame.pose.orientation.y= q1.y();
+    send_frame.pose.orientation.z= q1.z();
+    send_frame.pose.orientation.w= q1.w();
+
+
     pub.publish(send_frame);
-    ROS_INFO_STREAM("pub_frame"<<"x="<<send_frame.pose.position.x<<" y= "<<send_frame.pose.position.y<<" z= "<<send_frame.pose.position.z);
+    // ROS_INFO_STREAM("pub_frame"<<"x="<<send_frame.pose.position.x<<" y= "<<send_frame.pose.position.y<<" z= "<<send_frame.pose.position.z);
+    ROS_INFO_STREAM("target_force x= "<<send_frame<<"f");
   }
 
 //sub target value
 void pos_force_controller::callback(const std_msgs::Float32MultiArray::ConstPtr& msg){
     if(msg->data.size()!=12){
-      ROS_ERROR("exception error. the size of input data must be 10");
+      ROS_ERROR("exception error. the size of input data must be 12");
       exit(EXIT_FAILURE);
     }
     pose_pid_gain = default_pose_pid_gain;
@@ -293,7 +337,7 @@ void pos_force_controller::start_pid(){
 
   vector<double> hole_pid_result{3,0};
   force_pid_result  = force_PID_controller(target_force,current_force);
-  pose_pid_result   = pose_PID_controller(target_pose,current_pose);
+  // pose_pid_result   = pose_PID_controller(target_pose,current_pose);
 
   target_torque[0]=0.0;
   target_torque[1]=0.0;
@@ -304,13 +348,14 @@ void pos_force_controller::start_pid(){
   // ROS_INFO_STREAM("force_pid_result"<<"x="<<force_pid_result[0]<<",y="<<force_pid_result[1]<<",z="<<force_pid_result[2]);
 
   for (uint i=0;i<=2;i++){
-    hole_pid_result[i]=pose_pid_result[i]-force_pid_result[i];
+    // hole_pid_result[i]=pose_pid_result[i]-force_pid_result[i];
+    hole_pid_result[i] = -force_pid_result[i];
   }
   // hole_pid_result[0]=pose_pid_result[0]-force_pid_result[0];
   // hole_pid_result[1]=pose_pid_result[1]-force_pid_result[1];
   // hole_pid_result[2]=pose_pid_result[2]-force_pid_result[2];
   // ROS_INFO_STREAM("hole_pid_result "<<"x="<<hole_pid_result[0]<<",y="<<hole_pid_result[1]<<",z="<<hole_pid_result[2]);
-  frame_pub(hole_pid_result);
+  frame_pub(hole_pid_result,torque_pid_result);
 }
 
 int main( int argc, char** argv )

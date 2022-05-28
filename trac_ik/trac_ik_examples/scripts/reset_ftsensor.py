@@ -34,6 +34,8 @@ class tf2_pub():
             ft_sensor_topic_n = rosparam.get_param("reset_ftsensor/ft_sensor_topic")
         except :
             ft_sensor_topic_n ='/wrench_ft300s'
+            # ft_sensor_topic_n ='/wrench'
+            
 
         #######################
         # subscribe ft sensor
