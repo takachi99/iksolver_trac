@@ -131,6 +131,16 @@ target_link_libraries(pf_hyb_controller
 )
 
 
+add_executable(compliance_ctrl src/compliance_ctrl.cpp)
+target_link_libraries(compliance_ctrl
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+  ${orocos_kdl_LIBRARIES}
+  ${pkg_nlopt_LIBRARIES}
+)
+
+
+
 install(TARGETS ik_tests
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

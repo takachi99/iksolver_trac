@@ -63,7 +63,7 @@ class pos_force_controller{
 
     //utils
     tf::Quaternion rpy_to_tf_quat(double roll, double pitch, double yaw);
-    vector<double>  check_outliner(const vector<double>& data ,double max, double min);
+    vector<double>  check_outlines(const vector<double>& data ,double max, double min);
 
 };
 
@@ -99,7 +99,7 @@ pos_force_controller::pos_force_controller():nh(), tfBuffer_(), tfListener_(tfBu
     temp[0]=force_transform.transform.translation.x;
     temp[1]=force_transform.transform.translation.y;
     temp[2]=force_transform.transform.translation.z;
-    current_force=check_outliner(temp,35.0,-35.0);
+    current_force=check_outlines(temp,35.0,-35.0);
     // ROS_INFO_STREAM("current_force x= "<<current_force[0]<<", y="<<current_force[1]<<", z= "<<current_force[2]);
   
     });
@@ -115,7 +115,7 @@ tf::Quaternion pos_force_controller::rpy_to_tf_quat(double roll, double pitch, d
   return tf::createQuaternionFromRPY(rpy.x, rpy.y, rpy.z);
 }
 
-vector<double> pos_force_controller::check_outliner(const vector<double> &data, double max,double min){
+vector<double> pos_force_controller::check_outlines(const vector<double> &data, double max,double min){
 vector<double>  val{3,0};
   for(uint i=0;i<=2;i++){
     if (max<=data[i])
@@ -174,7 +174,7 @@ void pos_force_controller::current_force_callback(const geometry_msgs::WrenchSta
   temp[0]=msg->wrench.force.x;
   temp[1]=msg->wrench.force.y;
   temp[2]=msg->wrench.force.z;
-  current_force=check_outliner(temp,9.0,-9.0);
+  current_force=check_outlines(temp,9.0,-9.0);
   ROS_INFO_STREAM("current_force x= "<<current_force[0]<<", y="<<current_force[1]<<", z= "<<current_force[2]);
 }
 
