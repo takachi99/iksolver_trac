@@ -247,6 +247,8 @@ void pos_force_controller::callback(const std_msgs::Float32MultiArray::ConstPtr&
     }
     pose_pid_gain = default_pose_pid_gain;
     force_pid_gain = default_force_pid_gain;
+    torque_pid_gain = default_torque_pid_gain;
+
 
     target_pose[0]=(msg->data[0]);
     target_pose[1]=(msg->data[1]);
@@ -267,6 +269,9 @@ void pos_force_controller::callback(const std_msgs::Float32MultiArray::ConstPtr&
       force_pid_gain[0]=0.0;
       force_pid_gain[1]=0.0;
       force_pid_gain[2]=0.0;
+      torque_pid_gain[0]=0.0;
+      torque_pid_gain[1]=0.0;
+      torque_pid_gain[2]=0.0;
     }
     // ROS_INFO_STREAM("target_pose x= "<<target_pose[0]<<", y="<<target_pose[1]<<", z= "<<target_pose[2]);
     // ROS_INFO_STREAM("target_force x= "<<target_force[0]<<", y="<<target_force[1]<<", z= "<<target_force[2]);
