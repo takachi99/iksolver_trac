@@ -54,7 +54,7 @@ class pos_force_controller{
     vector<double> force_integral{3,0};
     vector<vector<double>> force_error{{0,0},{0,0},{0,0}};
     // vector<double> default_force_pid_gain{0.0001*1,0.0,0.000024*1.0};//{P,I,D} for ex
-    vector<double> default_force_pid_gain{0.0002*4.5,0.0,0.000024*1};//{P,I,D} for ex2
+    vector<double> default_force_pid_gain{0.0002*6.5,0.0,0.000024*1};//{P,I,D} for ex2
     vector<double> force_pid_gain{0.00,0.0,0.00};//{P,I,D}
 
   
@@ -87,7 +87,7 @@ class pos_force_controller{
 
 pos_force_controller::pos_force_controller():nh(), tfBuffer_(), tfListener_(tfBuffer_)
 {
-    pub_2 = nh.advertise<geometry_msgs::Point>("/end_effector_point", 1); 
+  pub_2 = nh.advertise<geometry_msgs::Point>("/end_effector_point", 1); // for visualization
 
   pose_pid_gain   = default_pose_pid_gain;
   force_pid_gain  = default_force_pid_gain;
@@ -140,6 +140,7 @@ pos_force_controller::pos_force_controller():nh(), tfBuffer_(), tfListener_(tfBu
   current_force_sub = nh.subscribe("/LowPass_filtered_wrench",10,&pos_force_controller::current_force_callback,this);//subscribe ft_sensor
   sub = nh.subscribe("array", 1, &pos_force_controller::callback,this); //subscribe input data
   pub = nh.advertise<geometry_msgs::PoseStamped>("/end_effector_pose", 1); //pub frame to ik solver node
+
 }
 
 
@@ -207,9 +208,9 @@ void pos_force_controller::frame_pub(const vector<double> &pose ,const vector<do
     double roll, pitch, yaw;
     m.getRPY(roll, pitch, yaw);
 
-    final_torque[0] = roll   -torque[0]*4;
+    final_torque[0] = roll   -torque[0]*3.5;
     final_torque[1] = pitch  -torque[2]*4; //z
-    final_torque[2] = yaw    +torque[1]*4;//y
+    final_torque[2] = yaw + torque[1] * 3.5; // y
 
     ROS_INFO_STREAM("pub_frame"<<"x="<<torque[0]*5<<" y= "<<torque[1]*5<<" z= "<<torque[2]*5);
 
@@ -374,3 +375,11 @@ int main( int argc, char** argv )
   }
 
 }
+
+        // force_x = data.wrench.force.x*(force_threshold>data.wrench.force.x>-force_threshold)
+        // force_y = data.wrench.force.y*(force_threshold>data.wrench.force.y>-force_threshold)
+        // force_z = data.wrench.force.z*(force_threshold>data.wrench.force.z>-force_threshold)
+
+        // torque_x = data.wrench.torque.x*(torque_threshold>data.wrench.torque.x>-torque_threshold)
+        // torque_y = data.wrench.torque.y*(torque_threshold>data.wrench.torque.y>-torque_threshold)
+        // torque_z = data.wrench.torque.z*(torque_threshold>data.wrench.torque.z>-torque_threshold)
