@@ -53,8 +53,8 @@ class pos_force_controller{
     vector<double> current_force{3,0};
     vector<double> force_integral{3,0};
     vector<vector<double>> force_error{{0,0},{0,0},{0,0}};
-    // vector<double> default_force_pid_gain{0.0001*1,0.0,0.000024*1.0};//{P,I,D} for ex
-    vector<double> default_force_pid_gain{0.00018*1.5,0.000024*1,0.000024*1};//{P,I,D} for ex2
+    vector<double> default_force_pid_gain{0.0001*1,0.0,0.000024*1.0};//{P,I,D} for ex
+    // vector<double> default_force_pid_gain{0.00018*5.5,0.000024*1,0.000024*1};//{P,I,D} for ex2
     vector<double> force_pid_gain{0.00,0.0,0.00};//{P,I,D}
 
   
@@ -298,55 +298,25 @@ vector<double> pos_force_controller::pose_PID_controller(const vector<double> &t
   return result;
 }
 
-//force pid control
-// vector<double> pos_force_controller::force_PID_controller(const vector<double> &target_val, const vector<double> &current_val){
-//   vector<double> force_result{3,0.0};
-//   vector<vector<double>> force_PID{{0},{0},{0}};
-//   for (uint i=0;i<=force_result.size();i++){
-//     force_error[i][0]=force_error[i][1];
-//     force_error[i][1]=-current_val[i]+target_val[i];
-//     force_integral[i] +=(force_error[i][0]+force_error[i][1])/2.0*0.002;
-//     force_PID[i][0]=force_pid_gain[0]*force_error[i][1];//P
-//     force_PID[i][1]=force_pid_gain[1]*force_integral[i];//I
-//     force_PID[i][2]=force_pid_gain[2]*(force_error[i][1]-force_error[i][0]);//D
-//     //ROS_INFO_STREAM("force_gain,p= "<<force_PID[i][0]<<", i="<<force_PID[i][1]<<", D= "<<force_PID[i][2]);
-//     force_result[i]=force_PID[i][0]+force_PID[i][1]+force_PID[i][2];
-//   }
-//   return force_result;
-// }
-
-
-
+// force pid control
 vector<double> pos_force_controller::force_PID_controller(const vector<double> &target_val, const vector<double> &current_val){
-
   vector<double> force_result{3,0.0};
   vector<vector<double>> force_PID{{0},{0},{0}};
-  vector<double> cff{10,0.5};
-  vector<vector<double>> diff_list{{0},{0},{0}};
-
-  double position;
-  double velocity;
-  double accel;
-
-  double mass;
-  double damper;
-  double spring;
-
-  damper = 0.000005;
-  spring = 0.0004;
-  // mass   = 0.000001;
-
-
   for (uint i=0;i<=force_result.size();i++){
-
-    position = -current_val[i]+target_val[i];
-    velocity = position/0.01;
-    accel    = velocity/0.01;
-
-    force_result[i] = damper*velocity+spring*position;
+    force_error[i][0]=force_error[i][1];
+    force_error[i][1]=-current_val[i]+target_val[i];
+    force_integral[i] +=(force_error[i][0]+force_error[i][1])/2.0*0.002;
+    force_PID[i][0]=force_pid_gain[0]*force_error[i][1];//P
+    force_PID[i][1]=force_pid_gain[1]*force_integral[i];//I
+    force_PID[i][2]=force_pid_gain[2]*(force_error[i][1]-force_error[i][0]);//D
+    //ROS_INFO_STREAM("force_gain,p= "<<force_PID[i][0]<<", i="<<force_PID[i][1]<<", D= "<<force_PID[i][2]);
+    force_result[i]=force_PID[i][0]+force_PID[i][1]+force_PID[i][2];
   }
   return force_result;
 }
+
+
+
 
 
 

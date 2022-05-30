@@ -131,13 +131,24 @@ target_link_libraries(pf_hyb_controller
 )
 
 
-add_executable(compliance_ctrl src/compliance_ctrl.cpp)
-target_link_libraries(compliance_ctrl
+add_executable(pid_pos_force_ctrl src/pid_pos_force_ctrl.cpp)
+target_link_libraries(pid_pos_force_ctrl
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
   ${orocos_kdl_LIBRARIES}
   ${pkg_nlopt_LIBRARIES}
 )
+
+
+
+add_executable(compliance_pos_force_ctrl src/compliance_pos_force_ctrl.cpp)
+target_link_libraries(compliance_pos_force_ctrl
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+  ${orocos_kdl_LIBRARIES}
+  ${pkg_nlopt_LIBRARIES}
+)
+
 
 
 
