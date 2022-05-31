@@ -88,14 +88,14 @@ class compliance_pub():
         target_config[1] =0.493
         target_config[2] =0.5
 
-        quat =self.euler_to_quaternion(Vector3(np.deg2rad(-90),0,0))
+        quat =self.euler_to_quaternion(Vector3(np.deg2rad(-90)+np.deg2rad(0),np.deg2rad(0),np.deg2rad(-20)))
 
         target_config[3] = quat.x
         target_config[4] = quat.y
         target_config[5] = quat.z
         target_config[6] = quat.w
         target_config[7] = 0.0
-        target_config[8] = -10.0
+        target_config[8] = 0.0
         target_config[9] = 0.0
         target_config[10]= 1.0
         target_config[11]= 1.0

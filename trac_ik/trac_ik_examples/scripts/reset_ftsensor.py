@@ -65,7 +65,7 @@ class tf2_pub():
     def current_ft_callback(self,data):
 
         # Low pass
-        a =0.8
+        a =0.9
 
 
 
@@ -77,6 +77,10 @@ class tf2_pub():
         self.current_force.wrench.torque.x=a*self.current_force.wrench.torque.x+(1-a)*data.wrench.torque.x
         self.current_force.wrench.torque.y=a*self.current_force.wrench.torque.y+(1-a)*data.wrench.torque.y
         self.current_force.wrench.torque.z=a*self.current_force.wrench.torque.z+(1-a)*data.wrench.torque.z
+        
+        
+        self.current_force.header.seq=data.header.seq
+        self.current_force.header.stamp =data.header.stamp
 
 
 
@@ -155,6 +159,8 @@ class tf2_pub():
         filtered_wrench = WrenchStamped()
 
         filtered_wrench.header.frame_id = "wrist_3_link"
+        filtered_wrench.header.seq  = self.current_force.header.seq
+        filtered_wrench.header.stamp  = self.current_force.header.stamp
 
         filtered_wrench.wrench.force.x=self.current_force.wrench.force.x-self.offset_force.wrench.force.x
         filtered_wrench.wrench.force.y=self.current_force.wrench.force.y-self.offset_force.wrench.force.y

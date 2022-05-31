@@ -44,8 +44,10 @@ class pos_force_controller{
     vector<double> target_pose{3,0};
     vector<double> current_pose{3,0};
     vector<double> previous_pose{3,0};
+    vector<vector<double>> pose_error{{0,0},{0,0},{0,0}};
+    // vector<double> default_force_sd{0.0008,1.5};////{Spring,Damper,D}
+    vector<double> default_force_sd{0.002,995000.5};////{Spring,Damper,D}
 
-    vector<double> default_force_sd{0.0005*0.8,0.08};////{Spring,Damper,D}
     // vector<double> default_force_sd{0.0005*1.8,0.};////{Spring,Damper,D}
 
     vector<double> force_sd{0.0,0.0};//{Spring,Damper,D}
@@ -70,7 +72,7 @@ class pos_force_controller{
     void current_force_callback(const geometry_msgs::WrenchStampedConstPtr& msg);
 
 
-    vector<double> force_spring_damp_ctrl(const vector<double> &current_pose,
+    vector<double> force_spring_damp_ctrl(
                                           const vector<double> &target_force,
                                           const vector<double> &current_force);
 
@@ -139,7 +141,7 @@ pos_force_controller::pos_force_controller():nh(), tfBuffer_(), tfListener_(tfBu
     temp[0]=force_transform.transform.translation.x;
     temp[1]=force_transform.transform.translation.y;
     temp[2]=force_transform.transform.translation.z;
-    current_force=check_outlines(temp,100.0,-100.0);
+    current_force=check_outlines(temp,50.0,-50.0);
     ROS_INFO_STREAM("current_force x= "<<current_force[0]<<", y="<<current_force[1]<<", z= "<<current_force[2]);
     geometry_msgs::Point pout;
     pout.x =current_pose[0];
@@ -206,14 +208,35 @@ void pos_force_controller::frame_pub(const vector<double> &pose ,const vector<do
     // send_frame.pose.position.y=current_pose[1]+pose[1];
     // send_frame.pose.position.z =current_pose[2]+pose[2];
 
+
     send_frame.pose.position.x =  target_pose[0]  + pose[0];
     send_frame.pose.position.y =  target_pose[1]  + pose[1];
     send_frame.pose.position.z =  target_pose[2]  + pose[2];
 
-    if (target_pose[1]+pose[1]>target_pose[1])
+    // if (target_pose[1]+pose[1]>target_pose[1])
+    //   {
+    //   send_frame.pose.position.y = target_pose[1]-target_pose[1]*0.0001;
+    //   }
+
+    if (-0.0005<pose[1] && pose[1]<0.0005)
       {
-      send_frame.pose.position.y = target_pose[1]-target_pose[1]*0.0001;
+        send_frame.pose.position.y = target_pose[1];
       }
+
+
+
+    if (-0.0005<pose[2] && pose[2]<0.0005)
+      {
+        send_frame.pose.position.z = target_pose[2];
+      }
+
+
+
+    if (-0.0005<pose[0] && pose[0]<0.0005)
+      {
+        send_frame.pose.position.x = target_pose[0];
+      }
+
 
 
 
@@ -289,8 +312,7 @@ void pos_force_controller::callback(const std_msgs::Float32MultiArray::ConstPtr&
 
 
 
-vector<double> pos_force_controller::force_spring_damp_ctrl(const vector<double> &current_pose,
-                                      const vector<double> &target_force,
+vector<double> pos_force_controller::force_spring_damp_ctrl(const vector<double> &target_force,
                                       const vector<double> &current_force){
 
     vector<double> force_result{3,0.0};
@@ -304,13 +326,20 @@ vector<double> pos_force_controller::force_spring_damp_ctrl(const vector<double>
     damper = force_sd[1];
 
     for (uint i=0;i<=force_result.size();i++){
+    // for (uint i=0;i<=1;i++){
 
       position = -current_force[i]+target_force[i];
-      velocity = (current_pose[i]-previous_pose[i])/0.02;
+
+      velocity = (pose_error[i][1]-pose_error[i][0])/2*0.005;
+
+      // velocity = (current_pose[i]-previous_pose[i])/2*0.004;
+
       previous_pose[i] = current_pose[i];
 
       force_result[i] = damper*velocity+spring*position;
     }
+
+
 
     return force_result;
                                       }
@@ -358,15 +387,18 @@ void pos_force_controller::start_pid(){
   vector<double> torque_pid_result{3,0};
   vector<double> hole_pid_result{3,0};
 
-  force_pid_result  = force_spring_damp_ctrl(current_pose,target_force,current_force);
+  force_pid_result  = force_spring_damp_ctrl(target_force,current_force);
 
 
   target_torque[0]=0.0;
   target_torque[1]=0.0;
   target_torque[2]=0.0;
 
-  torque_pid_result = force_spring_damp_ctrl(current_pose,target_torque,current_torque);
+
+
+  torque_pid_result = torque_spring_damp_ctrl(current_pose,target_torque,current_torque);
   ROS_INFO_STREAM("hole_pid_result "<<"x="<<torque_pid_result[0]<<",y="<<torque_pid_result[1]<<",z="<<torque_pid_result[2]);
+
 
   for (uint i=0;i<=2;i++){
     hole_pid_result[i] = -force_pid_result[i];
