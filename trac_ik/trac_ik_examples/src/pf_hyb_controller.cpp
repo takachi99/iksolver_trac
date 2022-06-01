@@ -83,7 +83,7 @@ pos_force_controller::pos_force_controller():nh(), tfBuffer_(), tfListener_(tfBu
 
   target_pose[0] = -0.119;
   target_pose[1] = 0.493;
-  target_pose[2] = 0.62;
+  target_pose[2] = 0.5;
   tf2::Quaternion q;
   q.setRPY((-90)*(M_PI/180), 0*(M_PI/180),0*(M_PI*180));
   target_orientation[0] = q.x();
