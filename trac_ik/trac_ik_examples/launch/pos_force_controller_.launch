@@ -8,4 +8,15 @@
     <node pkg="trac_ik_examples" name="reset_ftsensor" type="reset_ftsensor.py" output="screen"/>
     <node pkg="trac_ik_examples" name="track_ik_jointpub" type="trac_ik_jointpub" output="screen"/>
     <!-- <node pkg="trac_ik_examples" name="pf_hyb_controller" type="pf_hyb_controller" output="screen"/> -->
+    <node name="Lowpass_wrench_torque_plot"
+            pkg="rqt_plot"
+            type="rqt_plot"
+            args="/LowPass_filtered_wrench/wrench/torque" />
+
+    <node name="Lowpass_wrench_force_plot"
+            pkg="rqt_plot"
+            type="rqt_plot"
+            args="/LowPass_filtered_wrench/wrench/force" />
+
+
 </launch>

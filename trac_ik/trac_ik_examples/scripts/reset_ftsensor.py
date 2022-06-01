@@ -65,7 +65,7 @@ class tf2_pub():
     def current_ft_callback(self,data):
 
         # Low pass
-        a =0.9
+        a =0.1
 
 
 
