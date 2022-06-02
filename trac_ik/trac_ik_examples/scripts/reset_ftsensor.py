@@ -69,28 +69,25 @@ class tf2_pub():
 
 
 
-
-        self.current_force.wrench.force.x=a*self.current_force.wrench.force.x+(1-a)*data.wrench.force.x;
-        self.current_force.wrench.force.y=a*self.current_force.wrench.force.y+(1-a)*data.wrench.force.y;
-        self.current_force.wrench.force.z=a*self.current_force.wrench.force.z+(1-a)*data.wrench.force.z;
-
-        self.current_force.wrench.torque.x=a*self.current_force.wrench.torque.x+(1-a)*data.wrench.torque.x
-        self.current_force.wrench.torque.y=a*self.current_force.wrench.torque.y+(1-a)*data.wrench.torque.y
-        self.current_force.wrench.torque.z=a*self.current_force.wrench.torque.z+(1-a)*data.wrench.torque.z
-        
-        
         self.current_force.header.seq=data.header.seq
         self.current_force.header.stamp =data.header.stamp
 
+        # self.current_force.wrench.force.x=a*self.current_force.wrench.force.x+(1-a)*data.wrench.force.x;
+        # self.current_force.wrench.force.y=a*self.current_force.wrench.force.y+(1-a)*data.wrench.force.y;
+        # self.current_force.wrench.force.z=a*self.current_force.wrench.force.z+(1-a)*data.wrench.force.z;
+
+        # self.current_force.wrench.torque.x=a*self.current_force.wrench.torque.x+(1-a)*data.wrench.torque.x
+        # self.current_force.wrench.torque.y=a*self.current_force.wrench.torque.y+(1-a)*data.wrench.torque.y
+        # self.current_force.wrench.torque.z=a*self.current_force.wrench.torque.z+(1-a)*data.wrench.torque.z
 
 
-        # self.current_force.wrench.force.x=data.wrench.force.x
-        # self.current_force.wrench.force.y=data.wrench.force.y
-        # self.current_force.wrench.force.z=data.wrench.force.z
+        self.current_force.wrench.force.x=data.wrench.force.x
+        self.current_force.wrench.force.y=data.wrench.force.y
+        self.current_force.wrench.force.z=data.wrench.force.z
 
-        # self.current_force.wrench.torque.x=data.wrench.torque.x
-        # self.current_force.wrench.torque.y=data.wrench.torque.y
-        # self.current_force.wrench.torque.z=data.wrench.torque.z
+        self.current_force.wrench.torque.x=data.wrench.torque.x
+        self.current_force.wrench.torque.y=data.wrench.torque.y
+        self.current_force.wrench.torque.z=data.wrench.torque.z
 
 
         # print(self.current_force)
