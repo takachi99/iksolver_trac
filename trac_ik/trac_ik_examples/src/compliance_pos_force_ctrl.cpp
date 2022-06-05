@@ -48,6 +48,16 @@ class pos_force_controller{
     // vector<double> default_force_sd{0.0008,1.5};////{Spring,Damper,D}
     vector<double> default_force_sd{0.002,995000.5};////{Spring,Damper,D}
 
+
+
+    vector<double> old_accel{3,0};
+    vector<double> old_speed{3,0};
+    vector<double> speed{3,0};
+    vector<double> diff{3,0};
+
+
+
+
     // vector<double> default_force_sd{0.0005*1.8,0.};////{Spring,Damper,D}
 
     vector<double> force_sd{0.0,0.0};//{Spring,Damper,D}
@@ -71,7 +81,10 @@ class pos_force_controller{
     void callback(const std_msgs::Float32MultiArray::ConstPtr& msg);
     void current_force_callback(const geometry_msgs::WrenchStampedConstPtr& msg);
 
-
+    vector<double> spring_damp_ctrl(const vector<double> &current_force,
+                                          const vector<double> &current_pose,
+                                          const vector<double> &target_pose);
+                                    
     vector<double> force_spring_damp_ctrl(
                                           const vector<double> &target_force,
                                           const vector<double> &current_force);
@@ -101,7 +114,7 @@ pos_force_controller::pos_force_controller():nh(), tfBuffer_(), tfListener_(tfBu
 
   target_pose[0] = -0.119;
   target_pose[1] = 0.493;
-  target_pose[2] = 0.5;
+  target_pose[2] = 0.6;
 
   previous_pose[0] = -0.119;
   previous_pose[1] = 0.493;
@@ -250,9 +263,15 @@ void pos_force_controller::frame_pub(const vector<double> &pose ,const vector<do
       double roll, pitch, yaw;
       m.getRPY(roll, pitch, yaw);
 
-      final_torque[0] = roll  - torque[0] * 10.;
-      final_torque[1] = pitch - torque[2] * 10.; // z
-      final_torque[2] = yaw   + torque[1] * 10.;   // y
+      // final_torque[0] = roll  - torque[0] * 10.;
+      // final_torque[1] = pitch - torque[2] * 10.; // z
+      // final_torque[2] = yaw   + torque[1] * 10.;   // y
+
+      final_torque[0] = roll  ;
+      final_torque[1] = pitch ; // z
+      final_torque[2] = yaw   ;   // y
+
+
 
       ROS_INFO_STREAM("pub_frame"
                       << "x=" << torque[0] * 5 << " y= " << torque[1] * 5 << " z= " << torque[2] * 5);
@@ -312,36 +331,74 @@ void pos_force_controller::callback(const std_msgs::Float32MultiArray::ConstPtr&
 
 
 
-vector<double> pos_force_controller::force_spring_damp_ctrl(const vector<double> &target_force,
-                                      const vector<double> &current_force){
 
-    vector<double> force_result{3,0.0};
-    double position;
-    double velocity;
 
-    double damper;
-    double spring;
+vector<double> pos_force_controller::spring_damp_ctrl(const vector<double> &current_force,const vector<double> &current_pose,
+                                      const vector<double> &target_pose){
 
-    spring = force_sd[0];
-    damper = force_sd[1];
+  vector<double> force_result{3, 0.0};
+  vector<double> target_accel{3, 0.0};
 
-    for (uint i=0;i<=force_result.size();i++){
+  double position;
+  double velocity;
+
+  double damper;
+  double spring;
+
+  spring = force_sd[0];
+  damper = force_sd[1];
+
+  for (uint i = 0; i <= force_result.size(); i++)
+  {
     // for (uint i=0;i<=1;i++){
 
-      position = -current_force[i]+target_force[i];
+      position = -current_pose[i]+target_pose[i];
 
-      velocity = (pose_error[i][1]-pose_error[i][0])/2*0.005;
+      velocity = (position)/2*0.005;
 
-      // velocity = (current_pose[i]-previous_pose[i])/2*0.004;
+      target_accel[i] = -spring * position - damper * velocity + current_force[i];
 
-      previous_pose[i] = current_pose[i];
+      speed[i] = ((target_accel[i] + old_accel[i]) * 0.005) / 2.0 + speed[i];
+      old_accel[i] = target_accel[i];
 
-      force_result[i] = damper*velocity+spring*position;
+      diff[i] = ((speed[i]+old_speed[i])*0.005)/2+diff[i];
+      old_speed[i] = speed[i];
+    }
+
+    return diff;
     }
 
 
+    vector<double> pos_force_controller::force_spring_damp_ctrl(const vector<double> &target_force,
+                                                                const vector<double> &current_force)
+    {
 
-    return force_result;
+      vector<double> force_result{3, 0.0};
+      double position;
+      double velocity;
+
+      double damper;
+      double spring;
+
+      spring = force_sd[0];
+      damper = force_sd[1];
+
+      for (uint i = 0; i <= force_result.size(); i++)
+      {
+        // for (uint i=0;i<=1;i++){
+
+        position = -current_force[i] + target_force[i];
+
+        velocity = (pose_error[i][1] - pose_error[i][0]) / 2 * 0.005;
+
+        // velocity = (current_pose[i]-previous_pose[i])/2*0.004;
+
+        previous_pose[i] = current_pose[i];
+
+        force_result[i] = damper * velocity + spring * position;
+      }
+
+      return force_result;
                                       }
 
 
@@ -375,11 +432,6 @@ vector<double> pos_force_controller::torque_spring_damp_ctrl(const vector<double
 
 
 
-
-
-
-
-
 //main loop
 void pos_force_controller::start_pid(){
 
@@ -387,17 +439,19 @@ void pos_force_controller::start_pid(){
   vector<double> torque_pid_result{3,0};
   vector<double> hole_pid_result{3,0};
 
-  force_pid_result  = force_spring_damp_ctrl(target_force,current_force);
-
+  // force_pid_result  = force_spring_damp_ctrl(target_force,current_force);
+  force_pid_result  = spring_damp_ctrl(current_force,current_force,target_force);
 
   target_torque[0]=0.0;
   target_torque[1]=0.0;
   target_torque[2]=0.0;
 
-
-
   torque_pid_result = torque_spring_damp_ctrl(current_pose,target_torque,current_torque);
-  ROS_INFO_STREAM("hole_pid_result "<<"x="<<torque_pid_result[0]<<",y="<<torque_pid_result[1]<<",z="<<torque_pid_result[2]);
+
+
+
+  // ROS_INFO_STREAM("hole_pid_result "<<"x="<<torque_pid_result[0]<<",y="<<torque_pid_result[1]<<",z="<<torque_pid_result[2]);
+  ROS_INFO_STREAM("hole_pid_result "<<"x="<<force_pid_result[0]<<",y="<<force_pid_result[1]<<",z="<<force_pid_result[2]);
 
 
   for (uint i=0;i<=2;i++){
